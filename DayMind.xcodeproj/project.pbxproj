@@ -1,0 +1,900 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0142666F6903F3A1BE4B1070 /* AssistantEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15C61D9EDA5BC49ECB77FCDA /* AssistantEngine.swift */; };
+		047552E481A5D5E6D9BB606B /* ResponseComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31E1612DDD2AEE88BC7BBAC0 /* ResponseComposer.swift */; };
+		07497902371A66D1A05D37D1 /* AudioSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 122EC3D7BB553E3B81CD5618 /* AudioSessionManager.swift */; };
+		09BDE91B57D845D30963C4C7 /* StorageAndIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41B6E0EC3DEF34B416707FFD /* StorageAndIntegrationTests.swift */; };
+		1B20985FDE06A549180E69C3 /* MemoriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D12A1EE41A5B24EF1D68C44 /* MemoriesView.swift */; };
+		273AC663477A53E18A89CF64 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CACDD7D98B0DDF75E464E272 /* SettingsStore.swift */; };
+		29C4DBD9F9DABE2D851893A8 /* ReminderServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB91D4011E460B71C5E9DB90 /* ReminderServiceTests.swift */; };
+		31602D328CCD0A6B1A7531B5 /* FoundationModelTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F504E7FF8F77017DF98D75B /* FoundationModelTools.swift */; };
+		4D7BA34B10E8B9EB25EE685F /* ExportImportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D21B8BABBD574E40E438948 /* ExportImportService.swift */; };
+		4F4D5DD222D65D0B5771ED2C /* ActionLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AD642B8BFD1AC81FAC38B95 /* ActionLog.swift */; };
+		4FDEE3BB69B13C0206816C2D /* NotificationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D477ECBD45C53D99AFF05A1C /* NotificationDelegate.swift */; };
+		527251F6CFF3F7A5898E4B49 /* TalkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEA5D6E0721C8A4A19F4A21 /* TalkView.swift */; };
+		5481CA90C71635E4CA3DFBCA /* MemoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39450BCD6D3E3BFB5412C0FB /* MemoryService.swift */; };
+		670C00275B3E2DBD957CAC7C /* DayMindControlsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 571C382F4D2A5AFD2137BDF9 /* DayMindControlsBundle.swift */; };
+		702AF23950E88AFDF84BE679 /* DayMindCore in Frameworks */ = {isa = PBXBuildFile; productRef = 1C5C48A03F308A77A8B1C366 /* DayMindCore */; };
+		715B54177D8F50799D3FA88D /* AppRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80C69496D9739184D832C9A /* AppRouter.swift */; };
+		74B9A30DEFE04293E1EF5653 /* InboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB16A374B9814D64FE6E38B /* InboxView.swift */; };
+		7A1EEDE65840EF6755D95BD5 /* NotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86F0BC85E63B8A7929120AA8 /* NotificationScheduler.swift */; };
+		7A71895770F24220F79E2B45 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 18FF8C600EF1AC1CCA0B447D /* Assets.xcassets */; };
+		7B192120F4D3DF3D19983AE0 /* DayMindIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 373AA53A67F8EEF5F856ED3A /* DayMindIntents.swift */; };
+		7C279F1CC7CDFD256076EFE3 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20488C4DB9831FEFC506DB35 /* SettingsView.swift */; };
+		7C437A7848FAC9F9EFF0440E /* OpenVoiceCaptureIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F19E280F7A9EEC3DB8B08E8 /* OpenVoiceCaptureIntent.swift */; };
+		7C7476390A88665938E0992C /* InboxAndConversationServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DB75D1EC7E2B13F1D510082 /* InboxAndConversationServices.swift */; };
+		7E0BB31132995F94EEC5F80F /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7CA15986A81C26947ECAEA0 /* AppEnvironment.swift */; };
+		81EF16FB16A71986D1E3094A /* OpenVoiceCaptureIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F19E280F7A9EEC3DB8B08E8 /* OpenVoiceCaptureIntent.swift */; };
+		8D99C33DDB703F06341F2CA1 /* Schema.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF62767A67EB5A7A39E1A55 /* Schema.swift */; };
+		92EE4A77BBB40318BDB8C58B /* BriefingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F164EA71BFCBA434573C7C3 /* BriefingService.swift */; };
+		97055C4B523EFB2FBF94B266 /* ReminderEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 395926790080AA25CEAF106B /* ReminderEditorView.swift */; };
+		A752B74BADF2E20A53A62210 /* TestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B842DF8AA46EE67B0983A4D /* TestSupport.swift */; };
+		A80225E4783CD640DECB0E24 /* ReminderService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0A4EDD1BC0BFF4BB4C41CA0 /* ReminderService.swift */; };
+		ADA8B19B78572FC4237CD244 /* MicButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = D427DAC744210B7F79596751 /* MicButton.swift */; };
+		AED71533762D08564B35B692 /* AppleIntelligenceProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B530E7C81767B1AAF2F391A2 /* AppleIntelligenceProvider.swift */; };
+		B0A42C1BD14CC0C2655D3691 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6D3FB1318FC030925607CA /* RootView.swift */; };
+		C8AB347613CC30E08034E8AC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 56EC9ACC4317EBF5930D88EB /* PrivacyInfo.xcprivacy */; };
+		CAF9D4DDFF92113696A205D0 /* DayMindCore in Frameworks */ = {isa = PBXBuildFile; productRef = 9FDB33C26B94FDFE7D027704 /* DayMindCore */; };
+		CBAD4F87D15BAA9B1692CFDC /* DataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0437072F20716238AE6A409 /* DataStore.swift */; };
+		D45511EB00AB7C93BF491967 /* SampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F97B6AE8311D0E80707647EE /* SampleData.swift */; };
+		D566449F9BAE735C6290415D /* SpeechRecognizers.swift in Sources */ = {isa = PBXBuildFile; fileRef = F596C18D8E8C6B3A9EFED7AD /* SpeechRecognizers.swift */; };
+		D6B984C7BF84AAE3B3CDAFB5 /* DayMindApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA60523C66E8DAD0968D7B09 /* DayMindApp.swift */; };
+		D770A9CFAAF251C84005B8A7 /* ActionCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0D125D93E9C744283B9800A /* ActionCardView.swift */; };
+		D8EA7C68530D364F93F1A4F6 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 987F73924D80C0DCAB7E9D43 /* TodayView.swift */; };
+		D8FD651BEDBAC1180D683308 /* AIProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 935935DE867729D728C12E7E /* AIProvider.swift */; };
+		E7FB96B92AEEA388F30E3F6C /* ModelExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FF7BA5627EA5DED8BB62A42 /* ModelExtensions.swift */; };
+		E98D3DCAB9B30222BE91C44B /* VoiceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8833750BFD4D4E252D4605BD /* VoiceController.swift */; };
+		E9F52BBF4FB23A81D22A66A7 /* DayMindControls.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 878E0BFEEC7B4C99F71E9425 /* DayMindControls.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		F0693EBBB1520186544449EE /* SpeechOutputService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B38A044A859C659AA7DAAE75 /* SpeechOutputService.swift */; };
+		F67020A5FA801BC54BB412CC /* AssistantEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BC37CEF936C5EAEE60AEC1A /* AssistantEngineTests.swift */; };
+		F7024799C6088EE3D12F53D2 /* AppleIntelligenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB875B98B0F0022460F3A987 /* AppleIntelligenceTests.swift */; };
+		F7B79C3BA8D552FF0BE49344 /* AssistantActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = E56559DB844B6EF9DF2F8163 /* AssistantActions.swift */; };
+		FE6CCEB7A045ADB7BDD90A5F /* ProjectsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65E78B26AD30E5E10D9D04BB /* ProjectsView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		8A1FDC7B0D665AC69D49F440 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 71DE042063502A50BA35633F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F8E004F145F2220E3B09EC79;
+			remoteInfo = DayMindControls;
+		};
+		BCBCFC9D413F184716476092 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 71DE042063502A50BA35633F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9F4EF11DE7131D17A7D4DF8F;
+			remoteInfo = DayMind;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		A5CA4985895678DD94C29566 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				E9F52BBF4FB23A81D22A66A7 /* DayMindControls.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		03AD174A292A46ED7E6A2D36 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		0F19E280F7A9EEC3DB8B08E8 /* OpenVoiceCaptureIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenVoiceCaptureIntent.swift; sourceTree = "<group>"; };
+		0FA07C5EB99A3A353458C389 /* DayMindCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = DayMindCore; path = Packages/DayMindCore; sourceTree = SOURCE_ROOT; };
+		122EC3D7BB553E3B81CD5618 /* AudioSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioSessionManager.swift; sourceTree = "<group>"; };
+		15C61D9EDA5BC49ECB77FCDA /* AssistantEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssistantEngine.swift; sourceTree = "<group>"; };
+		18FF8C600EF1AC1CCA0B447D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		20488C4DB9831FEFC506DB35 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		2B842DF8AA46EE67B0983A4D /* TestSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestSupport.swift; sourceTree = "<group>"; };
+		31E1612DDD2AEE88BC7BBAC0 /* ResponseComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseComposer.swift; sourceTree = "<group>"; };
+		3225D6E761E1BD9CB8E3FE7D /* DayMind.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = DayMind.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		373AA53A67F8EEF5F856ED3A /* DayMindIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayMindIntents.swift; sourceTree = "<group>"; };
+		39450BCD6D3E3BFB5412C0FB /* MemoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryService.swift; sourceTree = "<group>"; };
+		395926790080AA25CEAF106B /* ReminderEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderEditorView.swift; sourceTree = "<group>"; };
+		3BC37CEF936C5EAEE60AEC1A /* AssistantEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssistantEngineTests.swift; sourceTree = "<group>"; };
+		41B6E0EC3DEF34B416707FFD /* StorageAndIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageAndIntegrationTests.swift; sourceTree = "<group>"; };
+		56EC9ACC4317EBF5930D88EB /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		571C382F4D2A5AFD2137BDF9 /* DayMindControlsBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayMindControlsBundle.swift; sourceTree = "<group>"; };
+		606F127E487963E3FE7CC0AC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		65E78B26AD30E5E10D9D04BB /* ProjectsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectsView.swift; sourceTree = "<group>"; };
+		6D21B8BABBD574E40E438948 /* ExportImportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportImportService.swift; sourceTree = "<group>"; };
+		6FF7BA5627EA5DED8BB62A42 /* ModelExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelExtensions.swift; sourceTree = "<group>"; };
+		7AD642B8BFD1AC81FAC38B95 /* ActionLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionLog.swift; sourceTree = "<group>"; };
+		7DB75D1EC7E2B13F1D510082 /* InboxAndConversationServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InboxAndConversationServices.swift; sourceTree = "<group>"; };
+		7F504E7FF8F77017DF98D75B /* FoundationModelTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoundationModelTools.swift; sourceTree = "<group>"; };
+		86F0BC85E63B8A7929120AA8 /* NotificationScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationScheduler.swift; sourceTree = "<group>"; };
+		878E0BFEEC7B4C99F71E9425 /* DayMindControls.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = DayMindControls.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		8833750BFD4D4E252D4605BD /* VoiceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceController.swift; sourceTree = "<group>"; };
+		935935DE867729D728C12E7E /* AIProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProvider.swift; sourceTree = "<group>"; };
+		9587400D69214ADC67193EF4 /* DayMind.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DayMind.entitlements; sourceTree = "<group>"; };
+		987F73924D80C0DCAB7E9D43 /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
+		9D12A1EE41A5B24EF1D68C44 /* MemoriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoriesView.swift; sourceTree = "<group>"; };
+		9F164EA71BFCBA434573C7C3 /* BriefingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefingService.swift; sourceTree = "<group>"; };
+		A7CA15986A81C26947ECAEA0 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
+		A80C69496D9739184D832C9A /* AppRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouter.swift; sourceTree = "<group>"; };
+		A8DD046746D4D9C2C788C640 /* DayMindTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = DayMindTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AFB16A374B9814D64FE6E38B /* InboxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InboxView.swift; sourceTree = "<group>"; };
+		B38A044A859C659AA7DAAE75 /* SpeechOutputService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechOutputService.swift; sourceTree = "<group>"; };
+		B530E7C81767B1AAF2F391A2 /* AppleIntelligenceProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleIntelligenceProvider.swift; sourceTree = "<group>"; };
+		BA60523C66E8DAD0968D7B09 /* DayMindApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayMindApp.swift; sourceTree = "<group>"; };
+		C0D125D93E9C744283B9800A /* ActionCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionCardView.swift; sourceTree = "<group>"; };
+		CACDD7D98B0DDF75E464E272 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
+		CBF62767A67EB5A7A39E1A55 /* Schema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Schema.swift; sourceTree = "<group>"; };
+		D0437072F20716238AE6A409 /* DataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataStore.swift; sourceTree = "<group>"; };
+		D0A4EDD1BC0BFF4BB4C41CA0 /* ReminderService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderService.swift; sourceTree = "<group>"; };
+		D427DAC744210B7F79596751 /* MicButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicButton.swift; sourceTree = "<group>"; };
+		D477ECBD45C53D99AFF05A1C /* NotificationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationDelegate.swift; sourceTree = "<group>"; };
+		E56559DB844B6EF9DF2F8163 /* AssistantActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssistantActions.swift; sourceTree = "<group>"; };
+		EB91D4011E460B71C5E9DB90 /* ReminderServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderServiceTests.swift; sourceTree = "<group>"; };
+		ED6D3FB1318FC030925607CA /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		EFEA5D6E0721C8A4A19F4A21 /* TalkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TalkView.swift; sourceTree = "<group>"; };
+		F596C18D8E8C6B3A9EFED7AD /* SpeechRecognizers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechRecognizers.swift; sourceTree = "<group>"; };
+		F97B6AE8311D0E80707647EE /* SampleData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleData.swift; sourceTree = "<group>"; };
+		FB875B98B0F0022460F3A987 /* AppleIntelligenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleIntelligenceTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		30F25E29B742C9A6EC53422F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				702AF23950E88AFDF84BE679 /* DayMindCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D562682EA8C5E3A685833D06 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CAF9D4DDFF92113696A205D0 /* DayMindCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		02A9B7EB4B051FF34A0197C3 /* Memories */ = {
+			isa = PBXGroup;
+			children = (
+				9D12A1EE41A5B24EF1D68C44 /* MemoriesView.swift */,
+			);
+			path = Memories;
+			sourceTree = "<group>";
+		};
+		0A751CADCE80F12CEEC75B47 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				9F164EA71BFCBA434573C7C3 /* BriefingService.swift */,
+				D0437072F20716238AE6A409 /* DataStore.swift */,
+				6D21B8BABBD574E40E438948 /* ExportImportService.swift */,
+				7DB75D1EC7E2B13F1D510082 /* InboxAndConversationServices.swift */,
+				39450BCD6D3E3BFB5412C0FB /* MemoryService.swift */,
+				86F0BC85E63B8A7929120AA8 /* NotificationScheduler.swift */,
+				D0A4EDD1BC0BFF4BB4C41CA0 /* ReminderService.swift */,
+				F97B6AE8311D0E80707647EE /* SampleData.swift */,
+				CACDD7D98B0DDF75E464E272 /* SettingsStore.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		0AAE3CA698A0BD2475DBA972 /* Intents */ = {
+			isa = PBXGroup;
+			children = (
+				373AA53A67F8EEF5F856ED3A /* DayMindIntents.swift */,
+			);
+			path = Intents;
+			sourceTree = "<group>";
+		};
+		1189364AB69EEC84383390AC /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				DBE4CF3F97331D1CF7B29839 /* Inbox */,
+				02A9B7EB4B051FF34A0197C3 /* Memories */,
+				9EB79CCCCEED5980192E7112 /* Projects */,
+				9894BD40ADD83A2CDB0C023B /* Settings */,
+				CAE24CB483834FCC9C9BD9C0 /* Talk */,
+				30F727CF399F05770613776F /* Today */,
+				ED6D3FB1318FC030925607CA /* RootView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		1F62D28343082D08C9AED0E1 /* Tools */ = {
+			isa = PBXGroup;
+			children = (
+				7F504E7FF8F77017DF98D75B /* FoundationModelTools.swift */,
+			);
+			path = Tools;
+			sourceTree = "<group>";
+		};
+		30F727CF399F05770613776F /* Today */ = {
+			isa = PBXGroup;
+			children = (
+				395926790080AA25CEAF106B /* ReminderEditorView.swift */,
+				987F73924D80C0DCAB7E9D43 /* TodayView.swift */,
+			);
+			path = Today;
+			sourceTree = "<group>";
+		};
+		50DFB1DF904F12D41C8766B9 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				0FA07C5EB99A3A353458C389 /* DayMindCore */,
+			);
+			path = Packages;
+			sourceTree = "<group>";
+		};
+		6535DABEB9FE05B9215E84C2 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				6FF7BA5627EA5DED8BB62A42 /* ModelExtensions.swift */,
+				CBF62767A67EB5A7A39E1A55 /* Schema.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		76BD03D006D6BACE9075E3AD /* Speech */ = {
+			isa = PBXGroup;
+			children = (
+				122EC3D7BB553E3B81CD5618 /* AudioSessionManager.swift */,
+				B38A044A859C659AA7DAAE75 /* SpeechOutputService.swift */,
+				F596C18D8E8C6B3A9EFED7AD /* SpeechRecognizers.swift */,
+				8833750BFD4D4E252D4605BD /* VoiceController.swift */,
+			);
+			path = Speech;
+			sourceTree = "<group>";
+		};
+		794A3ED29B347B60D0A8890E /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				0F19E280F7A9EEC3DB8B08E8 /* OpenVoiceCaptureIntent.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		94B85F52D051A6A6F2389713 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				18FF8C600EF1AC1CCA0B447D /* Assets.xcassets */,
+				56EC9ACC4317EBF5930D88EB /* PrivacyInfo.xcprivacy */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		95234CEB734067943C38B720 /* AI */ = {
+			isa = PBXGroup;
+			children = (
+				1F62D28343082D08C9AED0E1 /* Tools */,
+				7AD642B8BFD1AC81FAC38B95 /* ActionLog.swift */,
+				935935DE867729D728C12E7E /* AIProvider.swift */,
+				B530E7C81767B1AAF2F391A2 /* AppleIntelligenceProvider.swift */,
+				E56559DB844B6EF9DF2F8163 /* AssistantActions.swift */,
+				15C61D9EDA5BC49ECB77FCDA /* AssistantEngine.swift */,
+				31E1612DDD2AEE88BC7BBAC0 /* ResponseComposer.swift */,
+			);
+			path = AI;
+			sourceTree = "<group>";
+		};
+		9894BD40ADD83A2CDB0C023B /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				20488C4DB9831FEFC506DB35 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		997FDBF0E6FB85DC90BB5E4D /* DayMindControls */ = {
+			isa = PBXGroup;
+			children = (
+				571C382F4D2A5AFD2137BDF9 /* DayMindControlsBundle.swift */,
+				606F127E487963E3FE7CC0AC /* Info.plist */,
+			);
+			path = DayMindControls;
+			sourceTree = "<group>";
+		};
+		9EB79CCCCEED5980192E7112 /* Projects */ = {
+			isa = PBXGroup;
+			children = (
+				65E78B26AD30E5E10D9D04BB /* ProjectsView.swift */,
+			);
+			path = Projects;
+			sourceTree = "<group>";
+		};
+		AFC190611976A29933A84B2C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3225D6E761E1BD9CB8E3FE7D /* DayMind.app */,
+				878E0BFEEC7B4C99F71E9425 /* DayMindControls.appex */,
+				A8DD046746D4D9C2C788C640 /* DayMindTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CAE24CB483834FCC9C9BD9C0 /* Talk */ = {
+			isa = PBXGroup;
+			children = (
+				C0D125D93E9C744283B9800A /* ActionCardView.swift */,
+				D427DAC744210B7F79596751 /* MicButton.swift */,
+				EFEA5D6E0721C8A4A19F4A21 /* TalkView.swift */,
+			);
+			path = Talk;
+			sourceTree = "<group>";
+		};
+		D182EF8ED8ACDD9AF389E2C9 = {
+			isa = PBXGroup;
+			children = (
+				F7886D0D981B84F8E8823567 /* DayMind */,
+				997FDBF0E6FB85DC90BB5E4D /* DayMindControls */,
+				DC3630E2008097CA7A1FC529 /* DayMindTests */,
+				50DFB1DF904F12D41C8766B9 /* Packages */,
+				794A3ED29B347B60D0A8890E /* Shared */,
+				AFC190611976A29933A84B2C /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		DBE4CF3F97331D1CF7B29839 /* Inbox */ = {
+			isa = PBXGroup;
+			children = (
+				AFB16A374B9814D64FE6E38B /* InboxView.swift */,
+			);
+			path = Inbox;
+			sourceTree = "<group>";
+		};
+		DC3630E2008097CA7A1FC529 /* DayMindTests */ = {
+			isa = PBXGroup;
+			children = (
+				FB875B98B0F0022460F3A987 /* AppleIntelligenceTests.swift */,
+				3BC37CEF936C5EAEE60AEC1A /* AssistantEngineTests.swift */,
+				EB91D4011E460B71C5E9DB90 /* ReminderServiceTests.swift */,
+				41B6E0EC3DEF34B416707FFD /* StorageAndIntegrationTests.swift */,
+				2B842DF8AA46EE67B0983A4D /* TestSupport.swift */,
+			);
+			path = DayMindTests;
+			sourceTree = "<group>";
+		};
+		F7886D0D981B84F8E8823567 /* DayMind */ = {
+			isa = PBXGroup;
+			children = (
+				95234CEB734067943C38B720 /* AI */,
+				FB6557C3AA3F5236645ADEED /* App */,
+				0AAE3CA698A0BD2475DBA972 /* Intents */,
+				6535DABEB9FE05B9215E84C2 /* Models */,
+				94B85F52D051A6A6F2389713 /* Resources */,
+				0A751CADCE80F12CEEC75B47 /* Services */,
+				76BD03D006D6BACE9075E3AD /* Speech */,
+				1189364AB69EEC84383390AC /* Views */,
+				9587400D69214ADC67193EF4 /* DayMind.entitlements */,
+				03AD174A292A46ED7E6A2D36 /* Info.plist */,
+			);
+			path = DayMind;
+			sourceTree = "<group>";
+		};
+		FB6557C3AA3F5236645ADEED /* App */ = {
+			isa = PBXGroup;
+			children = (
+				A7CA15986A81C26947ECAEA0 /* AppEnvironment.swift */,
+				A80C69496D9739184D832C9A /* AppRouter.swift */,
+				BA60523C66E8DAD0968D7B09 /* DayMindApp.swift */,
+				D477ECBD45C53D99AFF05A1C /* NotificationDelegate.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		9F4EF11DE7131D17A7D4DF8F /* DayMind */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B59426A65291E78D7C073997 /* Build configuration list for PBXNativeTarget "DayMind" */;
+			buildPhases = (
+				B129CD35BA32A7FDF14CCFF1 /* Sources */,
+				6772B83E7E85F9B4E2DB0B06 /* Resources */,
+				30F25E29B742C9A6EC53422F /* Frameworks */,
+				A5CA4985895678DD94C29566 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5E462E70F8AF205B25596765 /* PBXTargetDependency */,
+			);
+			name = DayMind;
+			packageProductDependencies = (
+				1C5C48A03F308A77A8B1C366 /* DayMindCore */,
+			);
+			productName = DayMind;
+			productReference = 3225D6E761E1BD9CB8E3FE7D /* DayMind.app */;
+			productType = "com.apple.product-type.application";
+		};
+		A3FDF12E6800EEB33280E9A5 /* DayMindTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 82F15555FF9E71E191E5DB8F /* Build configuration list for PBXNativeTarget "DayMindTests" */;
+			buildPhases = (
+				56EFB7112AF3B3E47EBAF621 /* Sources */,
+				D562682EA8C5E3A685833D06 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A63A76C7D7B539B02C5C9800 /* PBXTargetDependency */,
+			);
+			name = DayMindTests;
+			packageProductDependencies = (
+				9FDB33C26B94FDFE7D027704 /* DayMindCore */,
+			);
+			productName = DayMindTests;
+			productReference = A8DD046746D4D9C2C788C640 /* DayMindTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		F8E004F145F2220E3B09EC79 /* DayMindControls */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ABC201BE6F1EA3FDC4C33376 /* Build configuration list for PBXNativeTarget "DayMindControls" */;
+			buildPhases = (
+				270B62851166C42891F1649C /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DayMindControls;
+			packageProductDependencies = (
+			);
+			productName = DayMindControls;
+			productReference = 878E0BFEEC7B4C99F71E9425 /* DayMindControls.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		71DE042063502A50BA35633F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					9F4EF11DE7131D17A7D4DF8F = {
+						ProvisioningStyle = Automatic;
+					};
+					A3FDF12E6800EEB33280E9A5 = {
+						ProvisioningStyle = Automatic;
+					};
+					F8E004F145F2220E3B09EC79 = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 816DA050EF5727BE709F554F /* Build configuration list for PBXProject "DayMind" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = D182EF8ED8ACDD9AF389E2C9;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				E79C059733F45A1FF8085C64 /* XCLocalSwiftPackageReference "Packages/DayMindCore" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = AFC190611976A29933A84B2C /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				9F4EF11DE7131D17A7D4DF8F /* DayMind */,
+				F8E004F145F2220E3B09EC79 /* DayMindControls */,
+				A3FDF12E6800EEB33280E9A5 /* DayMindTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		6772B83E7E85F9B4E2DB0B06 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7A71895770F24220F79E2B45 /* Assets.xcassets in Resources */,
+				C8AB347613CC30E08034E8AC /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		270B62851166C42891F1649C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				670C00275B3E2DBD957CAC7C /* DayMindControlsBundle.swift in Sources */,
+				7C437A7848FAC9F9EFF0440E /* OpenVoiceCaptureIntent.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		56EFB7112AF3B3E47EBAF621 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F7024799C6088EE3D12F53D2 /* AppleIntelligenceTests.swift in Sources */,
+				F67020A5FA801BC54BB412CC /* AssistantEngineTests.swift in Sources */,
+				29C4DBD9F9DABE2D851893A8 /* ReminderServiceTests.swift in Sources */,
+				09BDE91B57D845D30963C4C7 /* StorageAndIntegrationTests.swift in Sources */,
+				A752B74BADF2E20A53A62210 /* TestSupport.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B129CD35BA32A7FDF14CCFF1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D8FD651BEDBAC1180D683308 /* AIProvider.swift in Sources */,
+				D770A9CFAAF251C84005B8A7 /* ActionCardView.swift in Sources */,
+				4F4D5DD222D65D0B5771ED2C /* ActionLog.swift in Sources */,
+				7E0BB31132995F94EEC5F80F /* AppEnvironment.swift in Sources */,
+				715B54177D8F50799D3FA88D /* AppRouter.swift in Sources */,
+				AED71533762D08564B35B692 /* AppleIntelligenceProvider.swift in Sources */,
+				F7B79C3BA8D552FF0BE49344 /* AssistantActions.swift in Sources */,
+				0142666F6903F3A1BE4B1070 /* AssistantEngine.swift in Sources */,
+				07497902371A66D1A05D37D1 /* AudioSessionManager.swift in Sources */,
+				92EE4A77BBB40318BDB8C58B /* BriefingService.swift in Sources */,
+				CBAD4F87D15BAA9B1692CFDC /* DataStore.swift in Sources */,
+				D6B984C7BF84AAE3B3CDAFB5 /* DayMindApp.swift in Sources */,
+				7B192120F4D3DF3D19983AE0 /* DayMindIntents.swift in Sources */,
+				4D7BA34B10E8B9EB25EE685F /* ExportImportService.swift in Sources */,
+				31602D328CCD0A6B1A7531B5 /* FoundationModelTools.swift in Sources */,
+				7C7476390A88665938E0992C /* InboxAndConversationServices.swift in Sources */,
+				74B9A30DEFE04293E1EF5653 /* InboxView.swift in Sources */,
+				1B20985FDE06A549180E69C3 /* MemoriesView.swift in Sources */,
+				5481CA90C71635E4CA3DFBCA /* MemoryService.swift in Sources */,
+				ADA8B19B78572FC4237CD244 /* MicButton.swift in Sources */,
+				E7FB96B92AEEA388F30E3F6C /* ModelExtensions.swift in Sources */,
+				4FDEE3BB69B13C0206816C2D /* NotificationDelegate.swift in Sources */,
+				7A1EEDE65840EF6755D95BD5 /* NotificationScheduler.swift in Sources */,
+				81EF16FB16A71986D1E3094A /* OpenVoiceCaptureIntent.swift in Sources */,
+				FE6CCEB7A045ADB7BDD90A5F /* ProjectsView.swift in Sources */,
+				97055C4B523EFB2FBF94B266 /* ReminderEditorView.swift in Sources */,
+				A80225E4783CD640DECB0E24 /* ReminderService.swift in Sources */,
+				047552E481A5D5E6D9BB606B /* ResponseComposer.swift in Sources */,
+				B0A42C1BD14CC0C2655D3691 /* RootView.swift in Sources */,
+				D45511EB00AB7C93BF491967 /* SampleData.swift in Sources */,
+				8D99C33DDB703F06341F2CA1 /* Schema.swift in Sources */,
+				273AC663477A53E18A89CF64 /* SettingsStore.swift in Sources */,
+				7C279F1CC7CDFD256076EFE3 /* SettingsView.swift in Sources */,
+				F0693EBBB1520186544449EE /* SpeechOutputService.swift in Sources */,
+				D566449F9BAE735C6290415D /* SpeechRecognizers.swift in Sources */,
+				527251F6CFF3F7A5898E4B49 /* TalkView.swift in Sources */,
+				D8EA7C68530D364F93F1A4F6 /* TodayView.swift in Sources */,
+				E98D3DCAB9B30222BE91C44B /* VoiceController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		5E462E70F8AF205B25596765 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F8E004F145F2220E3B09EC79 /* DayMindControls */;
+			targetProxy = 8A1FDC7B0D665AC69D49F440 /* PBXContainerItemProxy */;
+		};
+		A63A76C7D7B539B02C5C9800 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9F4EF11DE7131D17A7D4DF8F /* DayMind */;
+			targetProxy = BCBCFC9D413F184716476092 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		37472E99EB1B43A212044052 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = minimal;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		52D10185ED87249FEDE9AB95 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = DayMind/DayMind.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = DayMind/Info.plist;
+				INFOPLIST_KEY_UIUserInterfaceStyle = Automatic;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.dabkowski.DayMind;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		57B3E4C9424EE54B89551508 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.dabkowski.DayMindTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DayMind.app/DayMind";
+			};
+			name = Release;
+		};
+		761C2CA105267919CE1BFF93 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = DayMindControls/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.dabkowski.DayMind.Controls;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		88742091D5BCFFA3E4235DF4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.dabkowski.DayMindTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DayMind.app/DayMind";
+			};
+			name = Debug;
+		};
+		963C29014BA26328C4949899 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = DayMind/DayMind.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = DayMind/Info.plist;
+				INFOPLIST_KEY_UIUserInterfaceStyle = Automatic;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.dabkowski.DayMind;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D0A0A76BBEF133F8B968601B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = minimal;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		E759200913D00C980535AC5F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = DayMindControls/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.dabkowski.DayMind.Controls;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		816DA050EF5727BE709F554F /* Build configuration list for PBXProject "DayMind" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D0A0A76BBEF133F8B968601B /* Debug */,
+				37472E99EB1B43A212044052 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		82F15555FF9E71E191E5DB8F /* Build configuration list for PBXNativeTarget "DayMindTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				88742091D5BCFFA3E4235DF4 /* Debug */,
+				57B3E4C9424EE54B89551508 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		ABC201BE6F1EA3FDC4C33376 /* Build configuration list for PBXNativeTarget "DayMindControls" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				761C2CA105267919CE1BFF93 /* Debug */,
+				E759200913D00C980535AC5F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B59426A65291E78D7C073997 /* Build configuration list for PBXNativeTarget "DayMind" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				963C29014BA26328C4949899 /* Debug */,
+				52D10185ED87249FEDE9AB95 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		E79C059733F45A1FF8085C64 /* XCLocalSwiftPackageReference "Packages/DayMindCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/DayMindCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1C5C48A03F308A77A8B1C366 /* DayMindCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DayMindCore;
+		};
+		9FDB33C26B94FDFE7D027704 /* DayMindCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DayMindCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 71DE042063502A50BA35633F /* Project object */;
+}
