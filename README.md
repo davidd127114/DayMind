@@ -8,9 +8,10 @@ and local notifications, or permanent memories about people, projects and decisi
 Foundation Models framework) on the iPhone itself. When Apple Intelligence is unavailable, a
 deterministic offline parser and a manual form keep everything working.
 
-> Status: source complete for Milestones 1–5. See [docs/TEST-STATUS.md](docs/TEST-STATUS.md) for
-> what is verified by automated tests on a macOS/iOS-simulator build server, what still needs a
-> physical iPhone, and what is untested.
+> Status: Milestones 1–5 implemented. CI on GitHub's macOS 26 runner is green: 44 core tests and
+> 42 app tests pass on the iOS 26 simulator (1 live-model test skipped there). Voice capture, spoken
+> replies, notification delivery, Siri/Action Button and CloudKit still need a physical iPhone —
+> see [docs/TEST-STATUS.md](docs/TEST-STATUS.md) for the exact split.
 
 ## What it does
 

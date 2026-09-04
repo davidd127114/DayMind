@@ -7,7 +7,12 @@ runners (Xcode 26.6, iOS 26 simulator), which have no microphone and no Apple In
 
 ## A. Verified by automated tests on macOS / iOS 26 simulator (CI)
 
-Core package (`swift test`, 43 tests):
+Latest green run: GitHub Actions run 33893073937 on 4 September 2026 — Xcode 26.6, iOS 26 simulator.
+Core package: **44 passed, 0 failed.** App bundle: **42 passed, 0 failed, 1 skipped** (the live
+Apple Intelligence test, skipped because the runner has no Apple Intelligence). The core package
+also passes on Windows with the Swift 6.3 toolchain.
+
+Core package (`swift test`, 44 tests):
 * Natural-language dates: tomorrow/next Friday/in two hours/September 11/ISO dates, bare-hour rules, vague words with configurable defaults, remainder cleanup.
 * Recurrence: weekly, first/last weekday of month, monthly day clamping (Jan 31 → Feb 28), every other week, yearly, end dates, **daily rules across the US daylight-saving change (Nov 1 2026 and Mar 8 2026)**, repeating-trigger eligibility, human descriptions, Codable round trip.
 * Deterministic interpreter: all nine acceptance statements plus "every Monday morning", mixed fact+reminder, doctor's-office memory, plumber reschedule, forgotten yesterday, follow-up if incomplete, "later" clarification, complete/delete references, chatter → unknown.
