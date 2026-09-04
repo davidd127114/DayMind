@@ -160,7 +160,7 @@ struct TalkView: View {
                         }
                         .buttonStyle(.plain)
                     }
-                    Button("Cancel", role: .cancel) { result = env.assistant.cancelPending() }
+                    Button("Cancel", role: .cancel) { self.result = env.assistant.cancelPending() }
                 }
             default:
                 HStack {
@@ -172,7 +172,7 @@ struct TalkView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(pending.isDestructive ? .red : .accentColor)
-                    Button { result = env.assistant.cancelPending() } label: {
+                    Button { self.result = env.assistant.cancelPending() } label: {
                         Label("No, cancel", systemImage: "xmark").frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.bordered)
