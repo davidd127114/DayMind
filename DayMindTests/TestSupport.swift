@@ -65,9 +65,12 @@ final class ChattyProvider: AIProvider {
 @MainActor
 enum TestEnv {
     /// Wednesday 2 September 2026, 10:00 New York.
-    static var now: Date { Fixture.date(2026, 9, 2, 10, 0) }
+    nonisolated static var now: Date { Fixture.date(2026, 9, 2, 10, 0) }
 
-    static func make(provider: AIProvider? = UnavailableProvider(), now: Date = TestEnv.now) -> (AppEnvironment, MockNotificationScheduler) {
+    /// `provider: nil` (the default) means "Apple Intelligence unavailable" via `UnavailableProvider`.
+    static func make(provider: AIProvider? = nil, now clock: Date? = nil) -> (AppEnvironment, MockNotificationScheduler) {
+        let provider: AIProvider? = provider ?? UnavailableProvider()
+        let now = clock ?? TestEnv.now
         let defaults = UserDefaults(suiteName: "DayMindTests-\(UUID().uuidString)")!
         let settings = SettingsStore(defaults: defaults)
         settings.timeZoneIdentifier = "America/New_York"
