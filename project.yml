@@ -1,0 +1,104 @@
+# XcodeGen specification. `xcodegen generate` produces DayMind.xcodeproj.
+# CI regenerates and commits the .xcodeproj so beginners can open it directly in Xcode.
+name: DayMind
+options:
+  bundleIdPrefix: com.dabkowski
+  deploymentTarget:
+    iOS: "26.0"
+  xcodeVersion: "26.0"
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+  groupSortPosition: top
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    SWIFT_STRICT_CONCURRENCY: minimal
+    IPHONEOS_DEPLOYMENT_TARGET: "26.0"
+    TARGETED_DEVICE_FAMILY: "1"
+    SUPPORTS_MACCATALYST: NO
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    CODE_SIGN_STYLE: Automatic
+    ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
+    CURRENT_PROJECT_VERSION: "1"
+    MARKETING_VERSION: "0.1.0"
+packages:
+  DayMindCore:
+    path: Packages/DayMindCore
+targets:
+  DayMind:
+    type: application
+    platform: iOS
+    sources:
+      - path: DayMind
+      - path: Shared
+    dependencies:
+      - package: DayMindCore
+      - target: DayMindControls
+        embed: true
+    entitlements:
+      path: DayMind/DayMind.entitlements
+      properties:
+        com.apple.developer.icloud-services: [CloudKit]
+        com.apple.developer.icloud-container-identifiers: [iCloud.com.dabkowski.DayMind]
+        aps-environment: development
+    info:
+      path: DayMind/Info.plist
+      properties:
+        CFBundleDisplayName: DayMind
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        ITSAppUsesNonExemptEncryption: false
+        NSMicrophoneUsageDescription: "DayMind uses the microphone only while you are on the Talk screen and have tapped the microphone button, so it can hear your reminder or note. Audio is transcribed and then discarded. No recordings are stored."
+        NSSpeechRecognitionUsageDescription: "DayMind turns your speech into text so it can create reminders and notes. On supported iPhones this happens entirely on your device."
+        NSUserNotificationsUsageDescription: "DayMind schedules local notifications so your reminders fire at the right time, even when the app is closed."
+        UIBackgroundModes: [remote-notification]
+        CFBundleURLTypes:
+          - CFBundleURLName: com.dabkowski.DayMind
+            CFBundleURLSchemes: [daymind]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.dabkowski.DayMind
+        INFOPLIST_KEY_UIUserInterfaceStyle: Automatic
+        ENABLE_PREVIEWS: YES
+        GENERATE_INFOPLIST_FILE: NO
+    scheme:
+      testTargets:
+        - DayMindTests
+      gatherCoverageData: true
+      environmentVariables:
+        DAYMIND_SEED_SAMPLE_DATA: "1"
+  DayMindControls:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: DayMindControls
+      - path: Shared
+    info:
+      path: DayMindControls/Info.plist
+      properties:
+        CFBundleDisplayName: DayMind Controls
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.dabkowski.DayMind.Controls
+        GENERATE_INFOPLIST_FILE: NO
+        SKIP_INSTALL: YES
+  DayMindTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: DayMindTests
+    dependencies:
+      - target: DayMind
+      - package: DayMindCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.dabkowski.DayMindTests
+        GENERATE_INFOPLIST_FILE: YES

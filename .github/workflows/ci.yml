@@ -1,0 +1,98 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  core:
+    name: DayMindCore (swift test)
+    runs-on: macos-26
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+      - name: Test core package
+        run: |
+          set -o pipefail
+          swift test --package-path Packages/DayMindCore 2>&1 | tee core-test.log | tail -60
+      - name: Upload core log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: core-test-log
+          path: core-test.log
+
+  app:
+    name: DayMind app (build + test on simulator)
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain
+        run: xcodebuild -version
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate Xcode project
+        run: xcodegen generate
+      - name: Pick a simulator
+        id: sim
+        run: python3 scripts/pick_simulator.py >> "$GITHUB_OUTPUT"
+      - name: Build for testing
+        run: |
+          set -o pipefail
+          xcodebuild build-for-testing \
+            -project DayMind.xcodeproj -scheme DayMind \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -derivedDataPath DerivedData \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            2>&1 | tee build.log | grep -E "error:|BUILD|\*\* " || true
+          if ! grep -q "BUILD SUCCEEDED" build.log; then
+            echo "::error::Build failed"
+            grep -E "error:" build.log | sort -u | head -80
+            exit 1
+          fi
+      - name: Test without building
+        run: |
+          set -o pipefail
+          xcodebuild test-without-building \
+            -project DayMind.xcodeproj -scheme DayMind \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -derivedDataPath DerivedData \
+            -resultBundlePath TestResults.xcresult \
+            2>&1 | tee test.log | grep -E "Test Suite|Test Case|Test run|passed|failed|error:|\*\* " || true
+          if ! grep -qE "TEST EXECUTE SUCCEEDED|\*\* TEST SUCCEEDED \*\*" test.log; then
+            echo "::error::Tests failed"
+            grep -E "error:|failed" test.log | head -80
+            exit 1
+          fi
+      - name: Upload logs and results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-and-test-logs
+          path: |
+            build.log
+            test.log
+            TestResults.xcresult
+          if-no-files-found: ignore
+      - name: Commit generated Xcode project
+        if: success() && github.ref == 'refs/heads/main'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f DayMind.xcodeproj
+          if git diff --cached --quiet; then echo "xcodeproj unchanged"; exit 0; fi
+          git commit -m "ci: regenerate DayMind.xcodeproj [skip ci]"
+          git pull --rebase origin main || true
+          git push

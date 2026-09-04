@@ -1,0 +1,23 @@
+# Xcode
+DerivedData/
+build/
+*.xcuserstate
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+*.xcresult
+.build/
+.swiftpm/
+Packages/*/.build/
+Packages/*/.swiftpm/
+# The .xcodeproj is generated from project.yml by XcodeGen. CI commits the generated
+# project back to the repository so beginners can open it directly in Xcode.
+# OS
+.DS_Store
+Thumbs.db
+# Local scratch
+/local/
