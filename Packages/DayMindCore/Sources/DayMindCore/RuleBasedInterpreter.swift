@@ -392,28 +392,31 @@ public struct RuleBasedInterpreter: Sendable {
     }
 
     static let personVerbs = "call|text|message|email|e-mail|phone|ring|meet|visit|pay|ask|tell|thank|invite|pick up|see|dm|ping|follow up with|check on"
-    static let notNames: Set<String> = ["the", "my", "a", "an", "him", "her", "them", "me", "back", "in", "on", "at", "to", "about", "it", "this", "that", "and", "or", "for", "up", "out", "later", "again", "today", "tomorrow", "someone", "everyone", "work", "home", "school", "office", "rent", "bills", "bill", "taxes", "insurance", "landlord", "plumber", "electrician", "dentist", "doctor", "vet", "bank"]
+    static let notNames: Set<String> = ["the", "my", "a", "an", "him", "her", "them", "me", "back", "in", "on", "at", "to", "about", "it", "this", "that", "and", "or", "for", "up", "out", "later", "again", "today", "tomorrow", "someone", "everyone", "work", "home", "school", "office", "rent", "bills", "bill", "taxes", "insurance", "landlord", "plumber", "electrician", "dentist", "doctor", "vet", "bank", "message", "messages", "text", "texts", "email", "emails", "mail", "phone", "calls", "call", "appointment", "appointments", "people", "friends", "family", "mom", "dad", "them", "us", "you", "myself", "that", "if", "when", "before", "after"]
 
     /// Best-effort person-name extraction for the offline path ("call Michael" → ["Michael"]).
     public static func extractPeople(from text: String) -> [String] {
         var names: [String] = []
+        let pronouns: Set<String> = ["he", "she", "they", "i", "we", "you", "it", "there", "what", "who", "everything", "nothing", "this", "that"]
+        // "<Name> prefers/likes/is/…" at the start of a statement takes priority.
+        if let regex = try? Regex(#"^(?:my\s+)?([a-z][a-z'\-]+)\s+(?:prefers?|likes?|loves?|hates?|dislikes?|is|has|wants?|needs?|said|told|works|lives|always|never|usually)\b"#).ignoresCase(),
+           let m = text.firstMatch(of: regex), let sub = m.output[1].substring {
+            let word = String(sub)
+            let lower = word.lowercased()
+            if !notNames.contains(lower), !pronouns.contains(lower), !lower.hasSuffix("'s") {
+                names.append(titleCase(word))
+            }
+        }
+        // "call Michael", "text John and Mary"
         if let regex = try? Regex("\\b(?:\(personVerbs))\\s+([a-z][a-z'\\-]+)(?:\\s+(?:and|&)\\s+([a-z][a-z'\\-]+))?").ignoresCase() {
             for m in text.matches(of: regex) {
                 for i in 1..<m.output.count {
                     if let sub = m.output[i].substring {
                         let word = String(sub)
-                        if !notNames.contains(word.lowercased()) { names.append(titleCase(word)) }
+                        let lower = word.lowercased()
+                        if !notNames.contains(lower), !pronouns.contains(lower), !minorWords.contains(lower) { names.append(titleCase(word)) }
                     }
                 }
-            }
-        }
-        // "<Name> prefers/likes/is/…" at the start of a statement.
-        if let regex = try? Regex(#"^(?:my\s+)?([a-z][a-z'\-]+)\s+(?:prefers?|likes?|loves?|hates?|dislikes?|is|has|wants?|needs?|said|told|works|lives|always|never|usually)\b"#).ignoresCase(),
-           let m = text.firstMatch(of: regex), let sub = m.output[1].substring {
-            let word = String(sub)
-            let lower = word.lowercased()
-            if !notNames.contains(lower), !["he", "she", "they", "i", "we", "you", "john's", "it", "there", "what", "who", "everything", "nothing"].contains(lower) {
-                names.append(titleCase(word))
             }
         }
         var seen = Set<String>()

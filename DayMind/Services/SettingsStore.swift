@@ -24,6 +24,7 @@ final class SettingsStore {
         hasSeededSampleData = defaults.bool(forKey: Keys.hasSeededSampleData)
         hasCompletedOnboarding = defaults.bool(forKey: Keys.hasCompletedOnboarding)
         autoStartListeningOnOpen = defaults.object(forKey: Keys.autoStartListening) as? Bool ?? true
+        lastDatabaseSync = defaults.object(forKey: Keys.lastDatabaseSync) as? Date ?? .distantPast
     }
 
     private enum Keys {
@@ -40,6 +41,7 @@ final class SettingsStore {
         static let hasSeededSampleData = "settings.hasSeededSampleData"
         static let hasCompletedOnboarding = "settings.hasCompletedOnboarding"
         static let autoStartListening = "settings.autoStartListeningOnOpen"
+        static let lastDatabaseSync = "settings.lastDatabaseSync"
     }
 
     /// `nil` means "follow the iPhone's current time zone".
@@ -57,6 +59,8 @@ final class SettingsStore {
     var hasSeededSampleData: Bool { didSet { defaults.set(hasSeededSampleData, forKey: Keys.hasSeededSampleData) } }
     var hasCompletedOnboarding: Bool { didSet { defaults.set(hasCompletedOnboarding, forKey: Keys.hasCompletedOnboarding) } }
     var autoStartListeningOnOpen: Bool { didSet { defaults.set(autoStartListeningOnOpen, forKey: Keys.autoStartListening) } }
+    /// When this device last wrote its preferences into the database (for the CloudKit mirror).
+    var lastDatabaseSync: Date { didSet { defaults.set(lastDatabaseSync, forKey: Keys.lastDatabaseSync) } }
 
     /// Incremented whenever a synced preference changes, so `PreferencesSync` can mirror it.
     private(set) var revision: Int = 0

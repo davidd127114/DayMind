@@ -81,6 +81,16 @@ final class RuleBasedInterpreterTests: XCTestCase {
         XCTAssertDate(r.dueDate, 2026, 9, 3, 9, 0)
     }
 
+    func testPeopleExtractionIgnoresCommonNouns() throws {
+        XCTAssertEqual(RuleBasedInterpreter.extractPeople(from: "john prefers text messages"), ["John"])
+        XCTAssertEqual(RuleBasedInterpreter.extractPeople(from: "text john and mary about the party"), ["John", "Mary"])
+        XCTAssertEqual(RuleBasedInterpreter.extractPeople(from: "call the bank"), [])
+        XCTAssertEqual(RuleBasedInterpreter.extractPeople(from: "email michael"), ["Michael"])
+        guard case .createReminderAndMemory(let r, let m) = i.interpret("John prefers text messages, so remind me tomorrow to message him") else { return XCTFail() }
+        XCTAssertEqual(m.people, ["John"])
+        XCTAssertEqual(r.title, "Message John")
+    }
+
     func testDoctorsOfficeIsAMemoryNotAReminder() throws {
         guard case .saveMemory(let m) = i.interpret("Remember that my doctor's office is closed on Fridays.") else { return XCTFail() }
         XCTAssertEqual(m.content, "My doctor's office is closed on fridays")

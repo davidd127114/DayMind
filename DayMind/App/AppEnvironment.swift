@@ -113,28 +113,23 @@ final class AppEnvironment {
 
     private func syncPreferencesWithDatabase() async {
         let context = store.context
-        let prefs = (try? context.fetch(FetchDescriptor<UserPreferences>()))?.first ?? {
-            let p = UserPreferences()
-            context.insert(p)
-            return p
-        }()
-        let brief = (try? context.fetch(FetchDescriptor<BriefingSettings>()))?.first ?? {
-            let b = BriefingSettings()
-            context.insert(b)
-            return b
-        }()
-        let lastSync = UserDefaults.standard.object(forKey: "settings.lastDatabaseSync") as? Date ?? .distantPast
-        if prefs.lastModified > lastSync.addingTimeInterval(5) {
-            // Another device changed preferences: adopt them.
-            settings.timeZoneIdentifier = prefs.timeZoneIdentifier
-            settings.timeDefaults = prefs.timeDefaults
-            settings.transcriptRetention = prefs.transcriptRetention
-            settings.voiceIdentifier = prefs.voiceIdentifier
-            settings.speechRate = prefs.speechRate
-            settings.speakResponses = prefs.speakResponses
-            settings.briefingEnabled = brief.isEnabled
-            settings.briefingTime = brief.time
+        let existingPrefs = (try? context.fetch(FetchDescriptor<UserPreferences>()))?.first
+        let existingBrief = (try? context.fetch(FetchDescriptor<BriefingSettings>()))?.first
+        if let existingPrefs, existingPrefs.lastModified > settings.lastDatabaseSync.addingTimeInterval(5) {
+            // The row changed since this device last wrote it (another device via CloudKit): adopt it.
+            settings.timeZoneIdentifier = existingPrefs.timeZoneIdentifier
+            settings.timeDefaults = existingPrefs.timeDefaults
+            settings.transcriptRetention = existingPrefs.transcriptRetention
+            settings.voiceIdentifier = existingPrefs.voiceIdentifier
+            settings.speechRate = existingPrefs.speechRate
+            settings.speakResponses = existingPrefs.speakResponses
+            if let existingBrief {
+                settings.briefingEnabled = existingBrief.isEnabled
+                settings.briefingTime = existingBrief.time
+            }
         }
+        let prefs = existingPrefs ?? { let p = UserPreferences(); context.insert(p); return p }()
+        let brief = existingBrief ?? { let b = BriefingSettings(); context.insert(b); return b }()
         writePreferencesToDatabase(prefs: prefs, brief: brief)
     }
 
@@ -157,7 +152,7 @@ final class AppEnvironment {
         brief.time = settings.briefingTime
         brief.lastModified = Date()
         try? store.save()
-        UserDefaults.standard.set(Date(), forKey: "settings.lastDatabaseSync")
+        settings.lastDatabaseSync = Date()
     }
 
     // MARK: Destructive

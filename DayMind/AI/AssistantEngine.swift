@@ -132,11 +132,17 @@ final class AssistantEngine {
 
     /// Re-processes an Inbox item (e.g. after Apple Intelligence became available).
     func retry(_ item: InboxItem) async -> AssistantResult {
-        let result = await handle(item.text, source: item.source)
+        var result = await handle(item.text, source: item.source)
+        // A failed retry re-files the text; keep the original item instead of a duplicate.
+        if let newID = result.inboxItemID, newID != item.id, let duplicate = inbox.fetch(id: newID) {
+            inbox.delete(duplicate)
+            result.inboxItemID = item.id
+        }
         if result.actions.contains(where: { $0.changedData }) || result.pending != nil {
             inbox.markResolved(item)
         } else {
-            inbox.recordRetry(item, reason: result.inboxItemID == nil ? .ambiguous : item.reason, detail: result.responseText)
+            let reason: InboxReason = lastAvailability.isAvailable ? .ambiguous : .modelUnavailable
+            inbox.recordRetry(item, reason: reason, detail: result.responseText)
         }
         return result
     }
