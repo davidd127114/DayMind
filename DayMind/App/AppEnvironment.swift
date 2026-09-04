@@ -12,7 +12,7 @@ import DayMindCore
 final class AppEnvironment {
     static let shared: AppEnvironment = {
         let settings = SettingsStore()
-        return AppEnvironment(settings: settings, inMemory: false, cloudKit: settings.cloudSyncEnabled, notifications: LocalNotificationScheduler())
+        return AppEnvironment(settings: settings, inMemory: false, cloudKit: settings.cloudSyncEnabled, notifications: LocalNotificationScheduler(), provider: defaultProvider())
     }()
 
     let settings: SettingsStore
@@ -35,7 +35,7 @@ final class AppEnvironment {
     private let logger = Logger(subsystem: "com.dabkowski.DayMind", category: "App")
     private var launched = false
 
-    init(settings: SettingsStore, inMemory: Bool, cloudKit: Bool, notifications: NotificationScheduling, provider: AIProvider? = AppEnvironment.defaultProvider()) {
+    init(settings: SettingsStore, inMemory: Bool, cloudKit: Bool, notifications: NotificationScheduling, provider: AIProvider?) {
         self.settings = settings
         self.notifications = notifications
         var storeError: String?
