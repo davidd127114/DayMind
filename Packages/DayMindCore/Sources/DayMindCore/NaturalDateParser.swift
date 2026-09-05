@@ -82,10 +82,12 @@ public struct NaturalDateParser: Sendable {
         var time: (hour: Int, minute: Int)? = nil
         var vagueTime: VagueTime? = nil
         var explicitTime = false
+        var bareHour = false
         if let m = firstTimeMatch(in: normalized, excluding: consumed) {
             time = m.time
             vagueTime = m.vague
             explicitTime = m.time != nil
+            bareHour = m.bareHour
             consumed.append(m.range)
             phrases.append(String(normalized[m.range]))
         }
@@ -114,6 +116,10 @@ public struct NaturalDateParser: Sendable {
             consumed.append(d.range)
             phrases.append(String(normalized[d.range]))
             if d.impliedVague != nil, vagueTime == nil, time == nil { vagueTime = d.impliedVague }
+            // "tonight at 8" → 8 PM even though a bare "at 8" alone would mean the morning.
+            if let t = time, bareHour, d.impliedVague == .evening || d.impliedVague == .night, (1...11).contains(t.hour) {
+                time = (t.hour + 12, t.minute)
+            }
         }
 
         guard explicitDate || explicitTime || vagueTime != nil else { return nil }
@@ -177,7 +183,13 @@ public struct NaturalDateParser: Sendable {
 
     // MARK: Matching helpers
 
-    struct TimeMatch { var range: Range<String.Index>; var time: (hour: Int, minute: Int)?; var vague: VagueTime? }
+    struct TimeMatch {
+        var range: Range<String.Index>
+        var time: (hour: Int, minute: Int)?
+        var vague: VagueTime?
+        /// True when the hour was given without am/pm ("at 8"), so a nearby "tonight" may flip it to PM.
+        var bareHour: Bool = false
+    }
     struct DurationMatch { var range: Range<String.Index>; var component: Calendar.Component; var value: Int }
     struct DateMatch { var range: Range<String.Index>; var day: Date; var impliedVague: VagueTime? }
 
@@ -214,6 +226,29 @@ public struct NaturalDateParser: Sendable {
             let word = (capture(m, 1) ?? "").lowercased()
             return TimeMatch(range: m.range, time: nil, vague: word == "midnight" ? .midnight : .noon)
         }
+        // half past 3 / quarter past 3 / quarter to 4
+        if let m = firstMatch(#"\b(?:at\s+)?(half|quarter)\s+(past|to)\s+(\d{1,2})\b"#, in: text, excluding: excluding), let h = capture(m, 3).flatMap(Int.init), (1...12).contains(h) {
+            let fraction = (capture(m, 1) ?? "").lowercased()
+            let direction = (capture(m, 2) ?? "").lowercased()
+            var hour = h
+            var minute = fraction == "half" ? 30 : 15
+            if direction == "to" { hour = h == 1 ? 12 : h - 1; minute = 45 }
+            return TimeMatch(range: m.range, time: (Self.assumeMeridiem(hour), minute), vague: nil)
+        }
+        // 5 in the morning / 3 in the afternoon / 8 in the evening / 5 tonight / 7 this evening
+        if let m = firstMatch(#"\b(?:at\s+)?(\d{1,2})(?::(\d{2}))?\s+(?:in\s+the\s+|this\s+)?(morning|afternoon|evening|tonight|at\s+night)\b"#, in: text, excluding: excluding),
+           let h = capture(m, 1).flatMap(Int.init), (1...12).contains(h) {
+            let minute = capture(m, 2).flatMap(Int.init) ?? 0
+            let word = (capture(m, 3) ?? "").lowercased()
+            let hour: Int
+            if word == "morning" { hour = h == 12 ? 0 : h } else { hour = h == 12 ? 12 : h + 12 }
+            // Keep the day word ("tonight") available for the date pass by only consuming the number.
+            let numberEnd = capture(m, 2) != nil ? m.output[2].range!.upperBound : m.output[1].range!.upperBound
+            return TimeMatch(range: m.range.lowerBound..<numberEnd, time: (hour, minute), vague: nil)
+        }
+        if let m = firstMatch(#"\bfirst\s+thing\b"#, in: text, excluding: excluding) {
+            return TimeMatch(range: m.range, time: nil, vague: .morning)
+        }
         if let m = firstMatch(#"\b(?:at\s+)?(\d{1,2}):(\d{2})\b"#, in: text, excluding: excluding),
            let h = capture(m, 1).flatMap(Int.init), let minute = capture(m, 2).flatMap(Int.init), (0...23).contains(h), (0...59).contains(minute) {
             let hour = (h <= 7 && h >= 1) ? h + 12 : h // "at 3:30" → 15:30 ; "at 8:30" → 08:30 ; "15:30" stays.
@@ -223,7 +258,7 @@ public struct NaturalDateParser: Sendable {
             return TimeMatch(range: m.range, time: (Self.assumeMeridiem(h), 0), vague: nil)
         }
         if let m = firstMatch(#"\bat\s+(\d{1,2})\b(?!\s*(?:st|nd|rd|th|/|-|:|\d))"#, in: text, excluding: excluding), let h = capture(m, 1).flatMap(Int.init), (0...23).contains(h) {
-            return TimeMatch(range: m.range, time: (Self.assumeMeridiem(h), 0), vague: nil)
+            return TimeMatch(range: m.range, time: (Self.assumeMeridiem(h), 0), vague: nil, bareHour: h <= 12)
         }
         if let m = firstMatch(#"\b(?:in\s+the\s+|this\s+)?(morning|afternoon|evening|night)\b"#, in: text, excluding: excluding) {
             let word = (capture(m, 1) ?? "").lowercased()
@@ -273,6 +308,15 @@ public struct NaturalDateParser: Sendable {
            let date = calendar.date(from: DateComponents(year: y, month: mo, day: d)) {
             return DateMatch(range: m.range, day: calendar.startOfDay(for: date), impliedVague: nil)
         }
+        // a week from today / two weeks from now / a month from today (checked before the bare "today" word)
+        if let m = firstMatch(#"\b(?:in\s+)?(a|an|one|two|three|four|\d+)\s+(day|week|month|year)s?\s+from\s+(?:today|now|tomorrow)\b"#, in: text, excluding: excluding) {
+            let n = Self.number(from: (capture(m, 1) ?? "1").lowercased()) ?? 1
+            let unit = (capture(m, 2) ?? "").lowercased()
+            let component: Calendar.Component = unit == "day" ? .day : unit == "week" ? .weekOfYear : unit == "month" ? .month : .year
+            var base = today
+            if String(text[m.range]).lowercased().hasSuffix("tomorrow"), let t = calendar.date(byAdding: .day, value: 1, to: today) { base = t }
+            if let day = calendar.date(byAdding: component, value: n, to: base) { return DateMatch(range: m.range, day: day, impliedVague: nil) }
+        }
         // Relative words
         if let m = firstMatch(#"\b(day after tomorrow|tomorrow|tonight|today|yesterday)\b"#, in: text, excluding: excluding) {
             let word = (capture(m, 1) ?? "").lowercased()
@@ -284,6 +328,30 @@ public struct NaturalDateParser: Sendable {
             case "yesterday": return DateMatch(range: m.range, day: calendar.date(byAdding: .day, value: -1, to: today) ?? today, impliedVague: nil)
             default: break
             }
+        }
+        // a week from today / two weeks from now / a month from today
+        if let m = firstMatch(#"\b(?:in\s+)?(a|an|one|two|three|four|\d+)\s+(day|week|month|year)s?\s+from\s+(?:today|now|tomorrow)\b"#, in: text, excluding: excluding) {
+            let n = Self.number(from: (capture(m, 1) ?? "1").lowercased()) ?? 1
+            let unit = (capture(m, 2) ?? "").lowercased()
+            let component: Calendar.Component = unit == "day" ? .day : unit == "week" ? .weekOfYear : unit == "month" ? .month : .year
+            var base = today
+            if String(text[m.range]).lowercased().hasSuffix("tomorrow"), let t = calendar.date(byAdding: .day, value: 1, to: today) { base = t }
+            if let day = calendar.date(byAdding: component, value: n, to: base) { return DateMatch(range: m.range, day: day, impliedVague: nil) }
+        }
+        // next week tuesday / tuesday next week / tuesday of next week
+        if let m = firstMatch("\\b(?:next\\s+week\\s+(?:on\\s+)?\(Self.weekdayPattern)|\(Self.weekdayPattern)\\s+(?:of\\s+)?next\\s+week)\\b", in: text, excluding: excluding),
+           let name = (capture(m, 1) ?? capture(m, 2))?.lowercased(), let weekday = Self.weekdayNames[name],
+           let thisWeek = calendar.dateInterval(of: .weekOfYear, for: today) {
+            var day = nextWeekday(weekday, from: today, includeToday: true)
+            if day < thisWeek.end, let later = calendar.date(byAdding: .day, value: 7, to: day) { day = later }
+            return DateMatch(range: m.range, day: day, impliedVague: nil)
+        }
+        // on the 3rd of next month
+        if let m = firstMatch(#"\b(?:on\s+)?the\s+(\d{1,2})(?:st|nd|rd|th)\s+of\s+next\s+month\b"#, in: text, excluding: excluding), let d = capture(m, 1).flatMap(Int.init), (1...31).contains(d),
+           let nextMonth = calendar.date(byAdding: .month, value: 1, to: today) {
+            let month = calendar.component(.month, from: nextMonth)
+            let year = calendar.component(.year, from: nextMonth)
+            return DateMatch(range: m.range, day: resolveMonthDay(month: month, day: d, year: year, today: today), impliedVague: nil)
         }
         // next week / next month / next year / this weekend / end of …
         if let m = firstMatch(#"\bnext\s+(week|month|year)\b"#, in: text, excluding: excluding) {
@@ -421,6 +489,18 @@ public struct NaturalDateParser: Sendable {
         var s = text.lowercased()
         s = s.replacingOccurrences(of: "\u{2019}", with: "'")
         s = s.replacingOccurrences(of: "a.m.", with: "am").replacingOccurrences(of: "p.m.", with: "pm")
+        // Common shorthand and speech-recognizer spellings.
+        let shorthand: [(String, String)] = [
+            (#"\b(tmrw|tmr|2moro|2morrow|tomorow|tommorow|tommorrow)\b"#, "tomorrow"),
+            (#"\btonite\b"#, "tonight"),
+            (#"\bo\s+clock\b"#, "o'clock"),
+            (#"\b(\d{1,2})\s*(am|pm)\b"#, "$1 $2"),
+            (#"\bnoon\s+tomorrow\b"#, "tomorrow at noon"),
+            (#"\bmidnight\s+tonight\b"#, "tonight at midnight"),
+        ]
+        for (pattern, replacement) in shorthand {
+            s = s.replacingOccurrences(of: pattern, with: replacement, options: .regularExpression)
+        }
         s = s.replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
         s = s.replacingOccurrences(of: #"[.!?]+\s*$"#, with: "", options: .regularExpression)
         return s.trimmingCharacters(in: .whitespacesAndNewlines)

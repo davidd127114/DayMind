@@ -74,7 +74,8 @@ struct TodayView: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
-                if !env.assistant.lastAvailability.isAvailable {
+                if case .unavailable(_, _, true) = env.assistant.lastAvailability {
+                    // Only worth a warning when the user can do something about it (model off / downloading).
                     Label(env.assistant.lastAvailability.detail, systemImage: "exclamationmark.triangle")
                         .font(.footnote)
                         .foregroundStyle(.orange)

@@ -114,6 +114,9 @@ public struct RuleBasedInterpreter: Sendable {
         if matches(#"\b(delete|remove|clear|erase|wipe)\s+(all|every|each)(\s+of)?(\s+my)?\s+reminders?\b"#, text) { return .deleteAllReminders }
         if matches(#"\b(delete|remove|clear|erase|wipe)\s+(all|every|each)(\s+of)?(\s+my)?\s+(memories|notes)\b"#, text) { return .deleteAllMemories }
 
+        if matches(#"\b(daily\s+)?(briefing|summary|rundown|agenda)\b"#, text) && matches(#"\b(give|what|my|today|read|tell|morning)\b"#, text) { return .dailyBriefing }
+        if matches(#"^(good morning|morning|what('s| is| does) my day (look like|looking like)|how('s| is) my day( looking| look)?|start my day)\b"#, text) { return .dailyBriefing }
+
         if let intent = parseProjectAssignment(text) { return intent }
         if let intent = parseSnooze(text) { return intent }
         if let intent = parseReschedule(text) { return intent }
@@ -121,21 +124,37 @@ public struct RuleBasedInterpreter: Sendable {
         if let intent = parseDeleteOne(text) { return intent }
         if let intent = parseSearch(text) { return intent }
         if let intent = parseList(text) { return intent }
-        if matches(#"\b(daily\s+)?(briefing|summary|rundown|agenda)\b"#, text) && matches(#"\b(give|what|my|today|read|tell)\b"#, text) { return .dailyBriefing }
 
         // Mixed: "John prefers texts, so remind me tomorrow to message him"
         if let intent = parseMixed(text) { return intent }
         if let draft = parseReminder(text) { return .createReminder(draft) }
         if let draft = parseMemory(text) { return .saveMemory(draft) }
+        if let draft = parseStatementAsMemory(text) { return .saveMemory(draft) }
         return .unknown
+    }
+
+    /// Plain statements of fact without "remember": "John's birthday is March 3", "my car is a blue Civic",
+    /// "the wifi password is hunter2". Saved as memories; questions and chatter are left alone.
+    func parseStatementAsMemory(_ text: String) -> MemoryDraft? {
+        guard text.split(separator: " ").count >= 3, !text.hasSuffix("?") else { return nil }
+        guard !matches(#"^(what|when|where|who|why|how|is|are|do|does|did|can|could|would|should|will|hey|hi|hello|thanks|thank you|ok|okay|yes|no|yeah|nope)\b"#, text) else { return nil }
+        guard !matches(#"\b(remind|reminder|snooze|delete|remove|cancel|show|list|move|change|schedule)\b"#, text) else { return nil }
+        // Subject must look like a noun phrase: "my …", "the …", "our …", "<name>", or "<name>'s …".
+        guard matches(#"^(my|our|the|his|her|their)\s+\w+(\s+\w+)?('s)?\s+(is|are|was|were|has|have|lives?|works?|prefers?|likes?|loves?|hates?|needs?|wants?|opens?|closes?|costs?)\b"#, text)
+            || matches(#"^[a-z]+('s)?\s+(is|are|was|were|has|have|lives|works|prefers|likes|loves|hates|needs|wants|opens|closes|costs|birthday)\b"#, text) else { return nil }
+        // Skip statements about DayMind itself or the immediate conversation.
+        guard !matches(#"^(the|that|this|it)\s+(is|was)\s+(great|good|fine|wrong|right|it|all|done)\b"#, text) else { return nil }
+        let content = text.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines.union(CharacterSet(charactersIn: ",.!")))
+        return MemoryDraft(title: Self.summaryTitle(content), content: SpokenFormatter.capitalizeFirst(content),
+                           category: Self.classifyMemory(content), people: Self.extractPeople(from: content))
     }
 
     // MARK: - Reminders
 
     public func parseReminder(_ text: String) -> ReminderDraft? {
         // "Remember that the office is closed on Fridays" is a memory even though it contains a weekday.
-        if matches(#"^(please\s+)?(remember|note|keep in mind|fyi)\b"#, text), !matches(#"\bremind me\b"#, text) { return nil }
-        let isReminder = matches(#"\b(remind|reminder|don't forget|do not forget|dont forget|i need to|i have to|i must|todo|to-do|task)\b"#, text)
+        if matches(#"^(please\s+)?(remember|note|keep in mind|fyi)\b"#, text), !matches(#"\bremind me\b"#, text), !matches(#"^(please\s+)?note to self\b"#, text) { return nil }
+        let isReminder = matches(#"\b(remind|reminder|reminded|don't forget|do not forget|dont forget|don't let me forget|i need to|i have to|i must|i gotta|i've got to|todo|to-do|task|note to self)\b"#, text)
         let recurrence = recurrenceParser.parse(text)
         var working = recurrence?.remainder ?? text
         let parsed = dateParser.parse(working)
@@ -185,16 +204,20 @@ public struct RuleBasedInterpreter: Sendable {
     func stripReminderScaffolding(_ s: String) -> String {
         var t = s
         let leading = [
-            #"^(please\s+)?(can you\s+|could you\s+|would you\s+)?(set\s+(a|an)\s+reminder\s+(for me\s+)?(to\s+)?)"#,
-            #"^(please\s+)?(can you\s+|could you\s+|would you\s+)?remind\s+me\s+(again\s+)?(please\s+)?(to\s+|that\s+|about\s+|of\s+)?"#,
-            #"^(please\s+)?(don't|do not|dont)\s+forget\s+(to\s+)?"#,
-            #"^(please\s+)?(i\s+(need|have)\s+to|i\s+must|i\s+should|i\s+want\s+to)\s+"#,
+            #"^(hey\s+|ok\s+|okay\s+)?(daymind[,\s]+)?"#,
+            #"^(please\s+)?(can you\s+|could you\s+|would you\s+|will you\s+)?(set|add|make|create|put|schedule)\s+(up\s+)?(a|an|another)\s+(quick\s+)?(reminder|alarm|task|todo|to-do)\s+(for me\s+)?(for\s+|to\s+|that\s+|about\s+)?"#,
+            #"^(please\s+)?(can you\s+|could you\s+|would you\s+|will you\s+)?remind\s+me\s+(again\s+)?(please\s+)?(to\s+|that\s+|about\s+|of\s+)?"#,
+            #"^(please\s+)?(i\s+(want|need|would like|'d like)\s+(to\s+be\s+reminded|a\s+reminder)\s+(to\s+|about\s+|that\s+|of\s+)?)"#,
+            #"^(please\s+)?(don't|do not|dont)\s+(let\s+me\s+)?forget\s+(to\s+|that\s+|about\s+)?"#,
+            #"^(please\s+)?(i\s+(need|have|gotta|got)\s+to|i\s+must|i\s+should|i\s+want\s+to|i've\s+got\s+to)\s+"#,
             #"^(please\s+)?(add\s+(a\s+)?(task|todo|to-do|reminder)\s+(to\s+)?)"#,
+            #"^(please\s+)?(note\s+to\s+self\s*[:,]?\s*)"#,
             #"^(please\s+)?(reminder|task|todo|to-do)\s*(:|to)?\s+"#,
         ]
         for p in leading { t = t.replacingOccurrences(of: p, with: "", options: .regularExpression) }
-        t = t.replacingOccurrences(of: #"\s+(again|please)\s*$"#, with: "", options: .regularExpression)
-        t = t.replacingOccurrences(of: #"^\s*(to|that|about)\s+"#, with: "", options: .regularExpression)
+        t = t.replacingOccurrences(of: #"\s+(again|please|for me)\s*$"#, with: "", options: .regularExpression)
+        t = t.replacingOccurrences(of: #"^\s*(to|that|about|for)\s+"#, with: "", options: .regularExpression)
+        t = t.replacingOccurrences(of: #"^\s*(to|that|about|for)\s+"#, with: "", options: .regularExpression)
         t = t.replacingOccurrences(of: #"\s+(if i don't complete (this|it)|if i haven't done (this|it))\s*$"#, with: "", options: .regularExpression)
         t = t.replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
         return t.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines.union(CharacterSet(charactersIn: ",.!?")))
@@ -203,12 +226,13 @@ public struct RuleBasedInterpreter: Sendable {
     // MARK: - Memories
 
     public func parseMemory(_ text: String) -> MemoryDraft? {
-        let isMemory = matches(#"^(please\s+)?(remember|note|keep in mind|save|store|record|make a note|take a note|fyi|don't forget)\b"#, text)
-            || matches(#"\b(remember that|remember this|note that|for the record)\b"#, text)
+        let isMemory = matches(#"^(please\s+)?(hey\s+|ok\s+|okay\s+)?(daymind[,\s]+)?(remember|note|keep in mind|save|store|record|make a note|take a note|write down|jot down|log|fyi|just so you know|don't forget)\b"#, text)
+            || matches(#"\b(remember that|remember this|note that|for the record|keep in mind that)\b"#, text)
         guard isMemory else { return nil }
         var content = text
         let leading = [
-            #"^(please\s+)?(remember|note|keep in mind|save|store|record|make a note|take a note|fyi)(\s+(that|this|down|of|about|for me))*\s*[:,]?\s*"#,
+            #"^(please\s+)?(hey\s+|ok\s+|okay\s+)?(daymind[,\s]+)?"#,
+            #"^(please\s+)?(can you\s+|could you\s+)?(remember|note to self|note|keep in mind|save|store|record|make a note|take a note|write down|jot down|log|fyi|just so you know)(\s+(that|this|down|of|about|for me|the fact that))*\s*[:,]?\s*"#,
             #"^(please\s+)?(don't|do not)\s+forget\s+(that\s+)?"#,
         ]
         for p in leading { content = content.replacingOccurrences(of: p, with: "", options: .regularExpression) }
@@ -269,6 +293,11 @@ public struct RuleBasedInterpreter: Sendable {
             #"^(?:search|look up|look for|find)(?: my)?(?: memories| notes)?(?: for| about)? (.+?)\??$"#,
             #"^(?:anything|what) (?:about|on) (.+?)\??$"#,
             #"^what(?:'s| is) (.+?)(?:'s)? (?:preference|preferences|number|address|birthday)\??$"#,
+            #"^(?:do you|did i) (?:know|remember|have) anything (?:about|on) (.+?)\??$"#,
+            #"^what (?:does|do) (.+?) (?:like|prefer|want|need)\??$"#,
+            #"^(?:when|where) (?:is|are|was|does|do) (.+?)\??$"#,
+            #"^remind me (?:what|which|when|where|how) (.+?)\??$"#,
+            #"^(?:what|which) (?:did|do) (?:i|we) (?:decide|choose|pick|say) (?:about|on|for) (.+?)\??$"#,
         ]
         for p in patterns {
             if let q = firstMatch(p, in: text) {
@@ -287,8 +316,17 @@ public struct RuleBasedInterpreter: Sendable {
         if matches(#"\b(what|show|list|anything|read).*(due|do|planned|scheduled|reminders?|tasks?|coming up)\b.*\b(this week|next few days|upcoming)\b"#, text) || matches(#"\bwhat('s| is) coming up\b"#, text) { return .listReminders(.upcoming) }
         if matches(#"\b(what|show|list|anything|read).*(due|do|planned|scheduled|on my (plate|list|schedule|agenda|calendar)|reminders?|tasks?|to-?dos?)\b.*\btoday\b"#, text) { return .listReminders(.today) }
         if matches(#"^what('s| is) (due|next|on today|on my plate|on my list|on the agenda)\b"#, text) { return .listReminders(.today) }
-        if matches(#"^(show|list)( me)?( all)?( my)? (reminders|tasks|to-?dos?)\b"#, text) { return .listReminders(.all) }
+        if matches(#"^(show|list|read|read me|tell me|give me)( me)?( all)?( of)?( my)? (reminders|tasks|to-?dos?|list)\b"#, text) { return .listReminders(.all) }
+        if matches(#"^how many (reminders|tasks|things) do i have\b"#, text) { return .listReminders(.all) }
         if matches(#"^what('s| is) next\b"#, text) { return .listReminders(.upcoming) }
+        // "what do I have tomorrow", "do I have anything today", "what's on my schedule", "what am I doing tomorrow", "anything due"
+        let asksSchedule = matches(#"\b(what do i have|do i have anything|what('s| is) (on|left|happening|going on)|what am i doing|anything (due|planned|scheduled|on)|what('s| is) (my|the) (schedule|day|plan)|whats on)\b"#, text)
+        if asksSchedule {
+            if matches(#"\btomorrow\b"#, text) { return .listReminders(.tomorrow) }
+            if matches(#"\b(this week|next few days|upcoming|coming up|the week)\b"#, text) { return .listReminders(.upcoming) }
+            if matches(#"\b(overdue|late|behind)\b"#, text) { return .listReminders(.overdue) }
+            return .listReminders(.today)
+        }
         return nil
     }
 
@@ -326,20 +364,32 @@ public struct RuleBasedInterpreter: Sendable {
     }
 
     func parseReschedule(_ text: String) -> InterpretedIntent? {
-        guard let regex = try? Regex(#"^(?:please\s+)?(?:can you\s+)?(move|change|reschedule|shift|switch)\s+(.+?)\s+(?:to|for|until)\s+(.+)$"#).ignoresCase(),
-              let mm = text.firstMatch(of: regex) else { return nil }
-        let what = mm.output[2].substring.map(String.init) ?? ""
-        let when = mm.output[3].substring.map(String.init) ?? ""
-        guard let parsed = dateParser.parse(when) else { return nil }
-        return .rescheduleReminder(extractReference(what), newDate: parsed.date, hasExplicitTime: parsed.hasExplicitTime)
+        if let regex = try? Regex(#"^(?:please\s+)?(?:can you\s+|actually\s+)?(move|change|reschedule|shift|switch|bump|push)\s+(.+?)\s+(?:back\s+)?(?:to|for|until|till)\s+(.+)$"#).ignoresCase(),
+           let mm = text.firstMatch(of: regex) {
+            let what = mm.output[2].substring.map(String.init) ?? ""
+            let when = mm.output[3].substring.map(String.init) ?? ""
+            if let parsed = dateParser.parse(when) {
+                return .rescheduleReminder(extractReference(what), newDate: parsed.date, hasExplicitTime: parsed.hasExplicitTime)
+            }
+        }
+        // "make it 5 pm", "actually make that tomorrow", "set it for friday", "do it tomorrow instead", "let's do 4 instead"
+        if let regex = try? Regex(#"^(?:actually[,\s]+)?(?:make|set|do|let's do)\s+(?:it|that|this)?\s*(?:for|at|on|to)?\s*(.+?)(?:\s+instead)?\s*$"#).ignoresCase(),
+           let mm = text.firstMatch(of: regex), matches(#"\b(make|set|do)\s+(it|that|this)\b|^let's do\b|\binstead\b"#, text) {
+            let when = mm.output[1].substring.map(String.init) ?? ""
+            if let parsed = dateParser.parse(when), parsed.remainder.split(separator: " ").count <= 1 {
+                return .rescheduleReminder(ReminderReference(usesAnaphora: true), newDate: parsed.date, hasExplicitTime: parsed.hasExplicitTime)
+            }
+        }
+        return nil
     }
 
     func parseComplete(_ text: String) -> InterpretedIntent? {
         let patterns = [
-            #"^(?:please\s+)?(?:mark|check off|tick off)\s+(.+?)\s+(?:as\s+)?(?:done|complete|completed|finished)\s*$"#,
+            #"^(?:please\s+)?(?:mark|check off|tick off|check)\s+(.+?)\s+(?:as\s+)?(?:done|complete|completed|finished|off)\s*$"#,
             #"^(?:please\s+)?(?:complete|finish|close)\s+(?:the\s+)?(.+?)(?:\s+reminder)?\s*$"#,
             #"^(?:i(?:'ve| have)?\s+)?(?:done|finished|completed)\s+(?:with\s+)?(?:the\s+)?(.+?)(?:\s+reminder)?\s*$"#,
-            #"^(?:that's|that is|it's|it is)\s+done\s*$"#,
+            #"^(?:that's|that is|it's|it is|this is)\s+(?:done|finished|complete|completed|taken care of|handled)\s*$"#,
+            #"^(?:done|finished|completed|did it|i did it|did that|i did that|got it done|all done|taken care of)\s*$"#,
         ]
         for p in patterns {
             guard let regex = try? Regex(p).ignoresCase(), let mm = text.firstMatch(of: regex) else { continue }
@@ -350,7 +400,11 @@ public struct RuleBasedInterpreter: Sendable {
     }
 
     func parseDeleteOne(_ text: String) -> InterpretedIntent? {
-        guard let regex = try? Regex(#"^(?:please\s+)?(?:delete|remove|cancel|forget about|get rid of)\s+(?:the\s+|my\s+)?(.+?)(?:\s+reminder)?\s*$"#).ignoresCase(),
+        // "scratch that", "never mind, delete that", "undo that reminder", "cancel that"
+        if matches(#"^(?:never\s*mind[,\s]+|actually[,\s]+)?(?:scratch|cancel|undo|drop|forget|delete|remove|trash)\s+(?:that|this|it|the last one|that one|that reminder|the last reminder)\s*(?:reminder)?\s*$"#, text) {
+            return .deleteReminder(ReminderReference(usesAnaphora: true))
+        }
+        guard let regex = try? Regex(#"^(?:please\s+)?(?:can you\s+)?(?:delete|remove|cancel|forget about|get rid of|trash|erase)\s+(?:the\s+|my\s+)?(.+?)(?:\s+reminder)?\s*$"#).ignoresCase(),
               let mm = text.firstMatch(of: regex) else { return nil }
         let what = mm.output[1].substring.map(String.init) ?? ""
         guard !what.isEmpty else { return nil }
@@ -386,7 +440,7 @@ public struct RuleBasedInterpreter: Sendable {
             dayHint = dateParser.parse(word)?.date
             s.removeSubrange(m.range)
         }
-        s = s.replacingOccurrences(of: #"\b(the|my|that|this|reminder|reminders|task|about|for)\b"#, with: " ", options: .regularExpression)
+        s = s.replacingOccurrences(of: #"\b(the|my|that|this|it|one|reminder|reminders|task|about|for|to|at|on|until|till|by|from)\b"#, with: " ", options: .regularExpression)
         s = s.replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression).trimmingCharacters(in: .whitespaces)
         return ReminderReference(titleHint: s.isEmpty ? nil : s, dayHint: dayHint, usesAnaphora: s.isEmpty && dayHint == nil)
     }

@@ -74,18 +74,32 @@ struct TalkView: View {
 
     private var modeBanner: some View {
         let availability = env.assistant.lastAvailability
+        var canRetry = false
+        if case .unavailable(_, _, true) = availability { canRetry = true }
+        let title: String
+        let detail: String
+        switch availability {
+        case .available:
+            title = "Apple Intelligence — on this iPhone"
+            detail = ""
+        case .unavailable(_, _, true):
+            title = "Built-in understanding (Apple Intelligence not ready)"
+            detail = availability.detail
+        default:
+            title = "Built-in understanding — private, on this iPhone"
+            detail = "This iPhone has no Apple Intelligence, so DayMind uses its own rules. Plain requests like “remind me tomorrow at 3 PM to call Michael” work; anything unclear is kept in the Inbox."
+        }
         return HStack(spacing: 8) {
-            Image(systemName: availability.isAvailable ? "apple.intelligence" : "gearshape.2")
-                .foregroundStyle(availability.isAvailable ? Color.accentColor : .orange)
+            Image(systemName: availability.isAvailable ? "apple.intelligence" : "text.badge.checkmark")
+                .foregroundStyle(availability.isAvailable ? Color.accentColor : (canRetry ? .orange : .teal))
             VStack(alignment: .leading, spacing: 2) {
-                Text(availability.isAvailable ? "Apple Intelligence — on this iPhone" : "Offline mode — built-in rules")
-                    .font(.footnote.weight(.semibold))
-                if !availability.isAvailable {
-                    Text(availability.detail).font(.caption2).foregroundStyle(.secondary)
+                Text(title).font(.footnote.weight(.semibold))
+                if !detail.isEmpty {
+                    Text(detail).font(.caption2).foregroundStyle(.secondary)
                 }
             }
             Spacer()
-            if !availability.isAvailable {
+            if canRetry {
                 Button("Retry") { env.assistant.refreshAvailability() }.font(.caption)
             }
         }
