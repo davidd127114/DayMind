@@ -31,8 +31,12 @@ enum NotificationCategory {
 protocol NotificationScheduling: AnyObject, Sendable {
     func requestAuthorization() async -> Bool
     func authorizationStatus() async -> UNAuthorizationStatus
-    func apply(plans: [NotificationPlan]) async
+    /// Schedules the plans. Returns a description of the failure for each identifier that could NOT be scheduled.
+    @discardableResult
+    func apply(plans: [NotificationPlan]) async -> [String: String]
     func remove(identifiers: [String]) async
+    /// Fires a one-off "notifications are working" alert a few seconds from now (onboarding test).
+    func scheduleTestNotification(after seconds: TimeInterval) async -> String?
     func pendingReminderIdentifiers() async -> Set<String>
     func scheduleBriefing(at time: TimeOfDay, title: String, body: String) async
     func cancelBriefing() async
@@ -71,7 +75,8 @@ final class LocalNotificationScheduler: NotificationScheduling, @unchecked Senda
         await center.notificationSettings().authorizationStatus
     }
 
-    func apply(plans: [NotificationPlan]) async {
+    func apply(plans: [NotificationPlan]) async -> [String: String] {
+        var failures: [String: String] = [:]
         for plan in plans {
             let content = UNMutableNotificationContent()
             content.title = plan.title
@@ -101,8 +106,20 @@ final class LocalNotificationScheduler: NotificationScheduling, @unchecked Senda
                 try await center.add(request)
             } catch {
                 logger.error("Could not schedule \(plan.identifier, privacy: .public): \(error.localizedDescription, privacy: .public)")
+                failures[plan.identifier] = error.localizedDescription
             }
         }
+        return failures
+    }
+
+    func scheduleTestNotification(after seconds: TimeInterval) async -> String? {
+        let content = UNMutableNotificationContent()
+        content.title = "DayMind"
+        content.body = "Notifications are working. This is how a reminder will look."
+        content.sound = .default
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: max(1, seconds), repeats: false)
+        let request = UNNotificationRequest(identifier: "daymind-test-notification", content: content, trigger: trigger)
+        do { try await center.add(request); return nil } catch { return error.localizedDescription }
     }
 
     func remove(identifiers: [String]) async {

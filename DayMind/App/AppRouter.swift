@@ -1,35 +1,65 @@
 import Foundation
 import Observation
 
-/// Navigation state shared by the tab bar, deep links, notifications and App Intents.
+/// Which slice of My Book is showing.
+enum BookFilter: String, CaseIterable, Identifiable, Hashable {
+    case all, upcoming, completed, memories, needsAttention
+
+    var id: String { rawValue }
+    var title: String {
+        switch self {
+        case .all: return "All"
+        case .upcoming: return "Upcoming"
+        case .completed: return "Completed"
+        case .memories: return "Memories"
+        case .needsAttention: return "Needs attention"
+        }
+    }
+    var systemImage: String {
+        switch self {
+        case .all: return "book.closed"
+        case .upcoming: return "clock"
+        case .completed: return "checkmark.circle"
+        case .memories: return "brain.head.profile"
+        case .needsAttention: return "tray.full"
+        }
+    }
+}
+
+/// Navigation state shared by the two screens, deep links, notifications and App Intents.
 @MainActor
 @Observable
 final class AppRouter {
-    enum Tab: String, Hashable, CaseIterable {
-        case today, talk, memories, projects, inbox
+    /// My Book is a pushed destination from the Butler screen.
+    var showMyBook = false
+    var bookFilter: BookFilter = .all
+    var bookSearch = ""
+    var showSettings = false
+    /// Set when the Butler should begin listening as soon as it appears (Action Button, control, Siri).
+    var autoStartListening = false
+    /// A reminder to open for editing (from a notification tap).
+    var reminderToOpen: UUID?
+
+    func openBook(_ filter: BookFilter = .all, search: String = "") {
+        bookFilter = filter
+        bookSearch = search
+        showMyBook = true
     }
 
-    var selectedTab: Tab = .today
-    /// Set when the Talk screen should begin listening as soon as it appears (Action Button, control, Siri).
-    var autoStartListening = false
-    /// A reminder to open (from a notification tap).
-    var reminderToOpen: UUID?
-    var showSettings = false
-
     func openTalk(autoStart: Bool) {
-        selectedTab = .talk
+        showMyBook = false
+        showSettings = false
         autoStartListening = autoStart
     }
 
     func open(reminderID: UUID) {
-        selectedTab = .today
+        showMyBook = false
         reminderToOpen = reminderID
     }
 
     /// Handles `daymind://` URLs from the widget, control, shortcuts and notification "Open" action.
     /// - `daymind://talk?autostart=1`
-    /// - `daymind://today`
-    /// - `daymind://inbox`
+    /// - `daymind://today` · `daymind://inbox` · `daymind://memories` · `daymind://book`
     /// - `daymind://reminder/<uuid>`
     func handle(url: URL) {
         guard url.scheme?.lowercased() == "daymind" else { return }
@@ -39,10 +69,10 @@ final class AppRouter {
         case "talk":
             let auto = query.first(where: { $0.name == "autostart" })?.value
             openTalk(autoStart: auto == "1" || auto == "true")
-        case "today": selectedTab = .today
-        case "inbox": selectedTab = .inbox
-        case "memories": selectedTab = .memories
-        case "projects": selectedTab = .projects
+        case "today", "book": openBook(.upcoming)
+        case "inbox": openBook(.needsAttention)
+        case "memories": openBook(.memories)
+        case "projects": openBook(.all)
         case "settings": showSettings = true
         case "reminder":
             if let id = UUID(uuidString: url.lastPathComponent) { open(reminderID: id) }

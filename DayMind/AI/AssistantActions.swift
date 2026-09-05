@@ -86,7 +86,7 @@ final class AssistantActions: @unchecked Sendable {
             let reminder = try await reminders.create(from: draft, transcript: currentTranscript, allowDuplicate: allowDuplicate)
             focusReminderID = reminder.id
             let summary = reminders.summary(reminder)
-            log.record(.reminderCreated(summary))
+            log.record(.reminderCreated(summary), undo: .deleteReminder(id: reminder.id, title: reminder.title))
             return "Saved reminder '\(summary.title)'" + (summary.dueDate.map { " for \(phrase($0))" } ?? " with no date") + (summary.recurrenceText.map { ", repeating \($0)" } ?? "") + "."
         } catch ReminderServiceError.possibleDuplicate(let existingID, _) {
             if let existing = reminders.fetch(id: existingID) {
@@ -161,6 +161,7 @@ final class AssistantActions: @unchecked Sendable {
     private func performUpdate(_ changes: ReminderChanges, on r: Reminder) async -> String {
         do {
             let before = reminders.summary(r)
+            let priorDue = r.dueDate, priorStatus = r.status, priorCompleted = r.completedAt, priorFollowUp = r.followUpDate
             try await reminders.apply(changes, to: r)
             focusReminderID = r.id
             let after = reminders.summary(r)
@@ -171,7 +172,10 @@ final class AssistantActions: @unchecked Sendable {
             if changes.notes != nil { describe.append("notes updated") }
             if case .some(let p) = changes.projectName { describe.append(p.map { "filed under \($0)" } ?? "removed from project") }
             let change = describe.isEmpty ? "updated" : describe.joined(separator: ", ")
-            log.record(.reminderUpdated(after, change: change))
+            let undo: UndoOperation? = changes.dueDate != nil
+                ? .restoreReminderState(id: r.id, title: after.title, dueDate: priorDue, status: priorStatus, completedAt: priorCompleted, followUpDate: priorFollowUp, dropLastSnooze: false)
+                : nil
+            log.record(.reminderUpdated(after, change: change), undo: undo)
             return "Updated '\(before.title)': \(change)."
         } catch {
             log.record(.failed(operation: "update reminder", message: error.localizedDescription))
@@ -189,9 +193,11 @@ final class AssistantActions: @unchecked Sendable {
             return "Several reminders match. The user is being asked to choose."
         case .one(let r):
             do {
+                let priorDue = r.dueDate, priorStatus = r.status, priorCompleted = r.completedAt, priorFollowUp = r.followUpDate
                 let next = try await reminders.complete(r)
                 focusReminderID = r.id
-                log.record(.reminderCompleted(reminders.summary(r), nextOccurrence: next))
+                log.record(.reminderCompleted(reminders.summary(r), nextOccurrence: next),
+                           undo: .restoreReminderState(id: r.id, title: r.title, dueDate: priorDue, status: priorStatus, completedAt: priorCompleted, followUpDate: priorFollowUp, dropLastSnooze: false))
                 return "Completed '\(r.title)'" + (next.map { ". Next occurrence \(phrase($0))" } ?? "") + "."
             } catch {
                 log.record(.failed(operation: "complete reminder", message: error.localizedDescription))
@@ -215,10 +221,11 @@ final class AssistantActions: @unchecked Sendable {
             return "Several reminders match. The user is being asked to choose."
         case .one(let r):
             let title = r.title
+            let snapshot = reminders.snapshot(r)
             do {
                 try await reminders.delete(r)
                 if focusReminderID == r.id { focusReminderID = nil }
-                log.record(.reminderDeleted(title: title))
+                log.record(.reminderDeleted(title: title), undo: .restoreReminder(snapshot))
                 return "Deleted '\(title)'."
             } catch {
                 log.record(.failed(operation: "delete reminder", message: error.localizedDescription))
@@ -238,9 +245,11 @@ final class AssistantActions: @unchecked Sendable {
             return "Several reminders match. The user is being asked to choose."
         case .one(let r):
             do {
+                let priorDue = r.dueDate, priorStatus = r.status, priorCompleted = r.completedAt, priorFollowUp = r.followUpDate
                 let until = try await reminders.snooze(r, by: Double(clamped) * 60)
                 focusReminderID = r.id
-                log.record(.reminderSnoozed(reminders.summary(r), until: until))
+                log.record(.reminderSnoozed(reminders.summary(r), until: until),
+                           undo: .restoreReminderState(id: r.id, title: r.title, dueDate: priorDue, status: priorStatus, completedAt: priorCompleted, followUpDate: priorFollowUp, dropLastSnooze: true))
                 return "Snoozed '\(r.title)' until \(phrase(until))."
             } catch {
                 log.record(.failed(operation: "snooze reminder", message: error.localizedDescription))
@@ -293,7 +302,7 @@ final class AssistantActions: @unchecked Sendable {
         do {
             let memory = try memories.create(from: draft, transcript: currentTranscript)
             lastSavedMemoryID = memory.id
-            log.record(.memorySaved(MemorySummary(memory)))
+            log.record(.memorySaved(MemorySummary(memory)), undo: .deleteMemory(id: memory.id, title: memory.title))
             return "Saved memory '\(memory.title)'" + (memory.project.map { " under project \($0.name)" } ?? "") + "."
         } catch {
             log.record(.failed(operation: "save memory", message: error.localizedDescription))
@@ -343,10 +352,11 @@ final class AssistantActions: @unchecked Sendable {
             return "No matching memory found."
         }
         let title = memory.title
+        let snapshot = memories.snapshot(memory)
         do {
             try memories.delete(memory)
             if lastSavedMemoryID == memory.id { lastSavedMemoryID = nil }
-            log.record(.memoryDeleted(title: title))
+            log.record(.memoryDeleted(title: title), undo: .restoreMemory(snapshot))
             return "Deleted memory '\(title)'."
         } catch {
             log.record(.failed(operation: "delete memory", message: error.localizedDescription))

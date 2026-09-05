@@ -36,6 +36,30 @@ enum PendingAction: Equatable, Sendable {
     }
 }
 
+/// A genuine reversal for an action the butler performed. Only recorded where a real undo exists.
+enum UndoOperation: Equatable, Sendable {
+    /// Undo "create": delete the reminder again.
+    case deleteReminder(id: UUID, title: String)
+    /// Undo complete / snooze / move: put the reminder back exactly as it was.
+    case restoreReminderState(id: UUID, title: String, dueDate: Date?, status: ReminderStatus, completedAt: Date?, followUpDate: Date?, dropLastSnooze: Bool)
+    /// Undo delete: recreate from a snapshot.
+    case restoreReminder(ReminderSnapshot)
+    /// Undo "remember": delete the memory again.
+    case deleteMemory(id: UUID, title: String)
+    /// Undo memory delete: recreate from a snapshot.
+    case restoreMemory(MemorySnapshot)
+
+    var description: String {
+        switch self {
+        case .deleteReminder(_, let title): return "Removed “\(title)” again."
+        case .restoreReminderState(_, let title, _, _, _, _, _): return "“\(title)” is back the way it was."
+        case .restoreReminder(let s): return "“\(s.title)” is back."
+        case .deleteMemory(_, let title): return "Forgot “\(title)” again."
+        case .restoreMemory(let s): return "“\(s.title)” is back."
+        }
+    }
+}
+
 /// One thing the assistant did (or could not do). Rendered as a card and used to compose the
 /// spoken confirmation. Only successful tool calls create success records.
 struct ActionRecord: Identifiable, Equatable, Sendable {
@@ -62,6 +86,7 @@ struct ActionRecord: Identifiable, Equatable, Sendable {
         case notFound(what: String)
         case failed(operation: String, message: String)
         case savedToInbox(reason: InboxReason)
+        case undone(String)
     }
 
     let id: UUID
@@ -78,7 +103,7 @@ struct ActionRecord: Identifiable, Equatable, Sendable {
     var changedData: Bool {
         switch kind {
         case .reminderCreated, .reminderUpdated, .reminderCompleted, .reminderDeleted, .reminderSnoozed, .reminderFollowUpSet,
-             .remindersDeleted, .memorySaved, .memoryUpdated, .memoryDeleted, .memoriesDeleted, .projectCreated, .itemAssignedToProject:
+             .remindersDeleted, .memorySaved, .memoryUpdated, .memoryDeleted, .memoriesDeleted, .projectCreated, .itemAssignedToProject, .undone:
             return true
         default:
             return false
@@ -91,6 +116,21 @@ struct ActionRecord: Identifiable, Equatable, Sendable {
         default: return false
         }
     }
+
+    /// The reminder this record is about, if any (for Edit / Done controls on the card).
+    var reminderID: UUID? {
+        switch kind {
+        case .reminderCreated(let r), .reminderUpdated(let r, _), .reminderCompleted(let r, _), .reminderSnoozed(let r, _), .reminderFollowUpSet(let r, _): return r.id
+        default: return nil
+        }
+    }
+
+    var memoryID: UUID? {
+        switch kind {
+        case .memorySaved(let m), .memoryUpdated(let m, _): return m.id
+        default: return nil
+        }
+    }
 }
 
 /// Collects action records during one request. Tools write here; the engine reads it afterwards.
@@ -98,18 +138,25 @@ struct ActionRecord: Identifiable, Equatable, Sendable {
 final class ActionLog {
     private(set) var records: [ActionRecord] = []
     private(set) var pending: PendingAction?
+    /// Undo operations keyed by the record they reverse.
+    private(set) var undoOperations: [UUID: UndoOperation] = [:]
 
-    func record(_ kind: ActionRecord.Kind) {
-        records.append(ActionRecord(kind))
+    @discardableResult
+    func record(_ kind: ActionRecord.Kind, undo: UndoOperation? = nil) -> ActionRecord {
+        let record = ActionRecord(kind)
+        records.append(record)
+        if let undo { undoOperations[record.id] = undo }
         switch kind {
         case .needsConfirmation(let p), .needsChoice(let p): pending = p
         default: break
         }
+        return record
     }
 
     func reset() {
         records = []
         pending = nil
+        undoOperations = [:]
     }
 
     var changedData: Bool { records.contains { $0.changedData } }

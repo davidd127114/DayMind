@@ -27,7 +27,7 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
                         env.router.open(reminderID: reminderID)
                     }
                 } else if response.notification.request.identifier == NotificationCategory.briefingIdentifier {
-                    env.router.selectedTab = .today
+                    env.router.openBook(.upcoming)
                 }
             }
         }

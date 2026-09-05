@@ -121,8 +121,10 @@ struct ReminderSummary: Identifiable, Hashable, Sendable {
     var priority: ReminderPriority
     var people: [String]
     var projectName: String?
+    var scheduleStatus: ScheduleStatus
 
-    init(_ r: Reminder, calendar: Calendar) {
+    init(_ r: Reminder, calendar: Calendar, scheduleStatus: ScheduleStatus = .unknown) {
+        self.scheduleStatus = scheduleStatus
         id = r.id
         title = r.title
         notes = r.notes

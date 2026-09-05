@@ -3,6 +3,7 @@ import DayMindCore
 
 /// Turns action records into the exact confirmation the user hears. Deterministic: the on-device
 /// model's own wording is used only when no data changed (answers, small talk).
+/// Voice: a warm, brief butler. No theatrics, no "sir".
 struct ResponseComposer {
     var now: Date
     var calendar: Calendar
@@ -17,57 +18,73 @@ struct ResponseComposer {
         }
         if sentences.isEmpty {
             if let modelText, !modelText.isEmpty { return modelText }
-            return "I'm not sure what to do with that. You can rephrase it, or turn it into a reminder or note from the Inbox."
+            return "I'm not sure what you'd like me to do with that. You can rephrase it, or turn it into a reminder or note from your book."
         }
         return sentences.joined(separator: " ")
+    }
+
+    func when(_ date: Date, includeTime: Bool = true) -> String {
+        SpokenFormatter.dateTimePhrase(date, now: now, calendar: calendar, includeTime: includeTime)
+    }
+
+    /// Truthful tail for a saved reminder: says nothing when the alert is really scheduled.
+    func scheduleTail(_ status: ScheduleStatus) -> String {
+        switch status {
+        case .scheduled, .repeating, .noAlertNeeded, .unknown: return ""
+        case .notificationsDenied: return " It's saved, but notifications are turned off for DayMind, so I can't alert you. You can enable them in Settings."
+        case .notDetermined: return " It's saved. Allow notifications so I can alert you at the time."
+        case .failed(let why): return " It's saved, but I could not schedule the alert: \(why)"
+        }
     }
 
     func sentence(for record: ActionRecord) -> String? {
         switch record.kind {
         case .reminderCreated(let r):
-            var text = SpokenFormatter.reminderConfirmation(title: r.title, date: r.dueDate, recurrence: nil, now: now, calendar: calendar)
-            if let rec = r.recurrenceText, let due = r.dueDate {
-                text = "Done. I'll remind you to \(SpokenFormatter.lowercaseFirst(r.title)) \(rec), starting \(SpokenFormatter.dateTimePhrase(due, now: now, calendar: calendar))."
+            var text: String
+            if let due = r.dueDate {
+                text = "Certainly. \(r.title) — \(when(due))."
+                if let rec = r.recurrenceText { text += " Repeats \(rec)." }
+            } else {
+                text = "Certainly. \(r.title) — no set time."
             }
             if let project = r.projectName { text += " Filed under \(project)." }
-            return text
+            return text + scheduleTail(r.scheduleStatus)
         case .reminderUpdated(let r, let change):
             if let due = r.dueDate, change.hasPrefix("moved") {
-                return "Done. “\(r.title)” is now \(SpokenFormatter.dateTimePhrase(due, now: now, calendar: calendar))."
+                return "Moved. \(r.title) — \(when(due))." + scheduleTail(r.scheduleStatus)
             }
-            return "Done. “\(r.title)” was \(change)."
+            return "Updated. \(r.title) — \(change)."
         case .reminderCompleted(let r, let next):
-            if let next { return "Marked “\(r.title)” done. The next one is \(SpokenFormatter.dateTimePhrase(next, now: now, calendar: calendar))." }
-            return "Marked “\(r.title)” as done."
+            if let next { return "Done. \(r.title). Next one \(when(next))." }
+            return "Done. \(r.title)."
         case .reminderDeleted(let title):
-            return "Deleted “\(title)”."
+            return "Removed \(title)."
         case .reminderSnoozed(let r, let until):
-            return "Snoozed “\(r.title)” until \(SpokenFormatter.dateTimePhrase(until, now: now, calendar: calendar))."
+            return "Snoozed. \(r.title) — \(when(until))." + scheduleTail(r.scheduleStatus)
         case .reminderFollowUpSet(let r, let at):
-            return "Okay. If “\(r.title)” isn't done, I'll remind you again \(SpokenFormatter.dateTimePhrase(at, now: now, calendar: calendar))."
+            return "Noted. If \(r.title) isn't done, I'll mention it once more \(when(at))."
         case .remindersDeleted(let count):
-            return count == 0 ? "There were no reminders to delete." : "Deleted \(count) reminder\(count == 1 ? "" : "s")."
+            return count == 0 ? "There were no reminders to remove." : "Removed \(count) reminder\(count == 1 ? "" : "s")."
         case .remindersListed(let list, let scope):
             return listSentence(list, scope: scope)
         case .memorySaved(let m):
-            var text = "Got it. I'll remember that \(SpokenFormatter.lowercaseFirst(m.content.trimmingCharacters(in: CharacterSet(charactersIn: "."))))."
+            var text = "Noted. \(m.content.trimmingCharacters(in: CharacterSet(charactersIn: ".")))."
             if let project = m.projectName { text += " Filed under \(project)." }
             return text
         case .memoryUpdated(let m, let change):
-            return "Memory “\(m.title)” \(change)."
+            return "Updated the note “\(m.title)” (\(change))."
         case .memoryDeleted(let title):
-            return "Deleted the memory “\(title)”."
+            return "Forgotten: “\(title)”."
         case .memoriesDeleted(let count):
-            return count == 0 ? "There were no memories to delete." : "Deleted \(count) memor\(count == 1 ? "y" : "ies")."
+            return count == 0 ? "There were no notes to remove." : "Removed \(count) note\(count == 1 ? "" : "s")."
         case .memoriesFound(let list, let query):
-            if list.isEmpty { return "I don't have anything saved about \(query)." }
+            if list.isEmpty { return "I have nothing saved about \(query)." }
             let items = list.prefix(4).map { $0.content.trimmingCharacters(in: CharacterSet(charactersIn: ".")) }
-            let prefix = list.count == 1 ? "Here's what you told me about \(query): " : "Here's what you told me about \(query): "
-            return prefix + items.joined(separator: ". ") + "."
+            return "Here's what you told me about \(query): " + items.joined(separator: ". ") + "."
         case .projectCreated(let name):
-            return "Project “\(name)” is ready."
+            return "The project “\(name)” is ready."
         case .itemAssignedToProject(let item, let project):
-            return "Filed “\(item)” under \(project)."
+            return "Filed \(item) under \(project)."
         case .briefing(let text):
             return text
         case .needsConfirmation(let p), .needsChoice(let p):
@@ -77,9 +94,16 @@ struct ResponseComposer {
         case .notFound(let what):
             return "I couldn't find \(what), so nothing was changed."
         case .failed(let op, let message):
-            return "I could not \(op): \(message) Nothing was saved. I kept your request in the Inbox."
+            return "I couldn't \(op): \(message) Nothing was saved. Your request is kept in your book under Needs attention."
         case .savedToInbox(let reason):
-            return "I saved what you said to the Inbox because \(reason.displayName.lowercased()). You can turn it into a reminder or note from there."
+            switch reason {
+            case .modelUnavailable, .modelFailed, .ambiguous:
+                return "I didn't understand that well enough to act on it. It's kept in your book under Needs attention, where one tap turns it into a reminder or a note."
+            default:
+                return "I've kept what you said in your book under Needs attention (\(reason.displayName.lowercased()))."
+            }
+        case .undone(let description):
+            return "Undone. \(description)"
         }
     }
 
@@ -106,7 +130,7 @@ struct ResponseComposer {
         let described = list.prefix(5).map { r -> String in
             guard let due = r.dueDate else { return r.title }
             if scope == .today || scope == .tomorrow { return "\(r.title) at \(SpokenFormatter.timeString(due, calendar: calendar))" }
-            return "\(r.title) \(SpokenFormatter.dateTimePhrase(due, now: now, calendar: calendar))"
+            return "\(r.title) \(when(due))"
         }
         var text: String
         switch scope {

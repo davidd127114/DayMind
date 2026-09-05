@@ -76,6 +76,18 @@ jobs:
             grep -E "error:|failed" test.log | head -80
             exit 1
           fi
+      - name: Export screenshots
+        if: always()
+        run: |
+          python3 scripts/export_screenshots.py TestResults.xcresult screenshots || echo "no screenshots exported"
+          ls -la screenshots 2>/dev/null || true
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: screenshots
+          if-no-files-found: ignore
       - name: Upload logs and results
         if: always()
         uses: actions/upload-artifact@v4

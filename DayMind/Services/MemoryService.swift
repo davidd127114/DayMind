@@ -35,6 +35,9 @@ final class MemoryService {
     private let settings: SettingsStore
     private let people: PersonService
     private let projects: ProjectService
+    var storeRef: DataStore { store }
+    var peopleService: PersonService { people }
+    var projectService: ProjectService { projects }
 
     init(store: DataStore, settings: SettingsStore, people: PersonService, projects: ProjectService) {
         self.store = store

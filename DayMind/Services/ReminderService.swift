@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import UserNotifications
 import DayMindCore
 
 enum ReminderServiceError: LocalizedError, Equatable {
@@ -36,15 +37,37 @@ struct ReminderChanges: Equatable, Sendable {
     }
 }
 
+/// Whether the alert for a reminder is really scheduled with iOS. Shown truthfully in confirmations.
+enum ScheduleStatus: Equatable, Hashable, Sendable {
+    case scheduled
+    case repeating
+    case notificationsDenied
+    case notDetermined
+    case failed(String)
+    case noAlertNeeded   // no due date, or completed
+    case unknown
+
+    var isProblem: Bool {
+        switch self {
+        case .notificationsDenied, .failed, .notDetermined: return true
+        default: return false
+        }
+    }
+}
+
 /// All reminder mutations go through here so notifications stay in sync with the database.
 @MainActor
 final class ReminderService {
-    private let store: DataStore
+    let store: DataStore
     private let notifications: NotificationScheduling
     private let settings: SettingsStore
     private let people: PersonService
     private let projects: ProjectService
+    var peopleService: PersonService { people }
+    var projectService: ProjectService { projects }
     var now: () -> Date = { Date() }
+    /// Last known alert-scheduling outcome per reminder (in-memory; refreshed on every sync/reconcile).
+    private(set) var scheduleStatuses: [UUID: ScheduleStatus] = [:]
 
     init(store: DataStore, notifications: NotificationScheduling, settings: SettingsStore, people: PersonService, projects: ProjectService) {
         self.store = store
@@ -354,7 +377,14 @@ final class ReminderService {
             }
         }
         try? store.save()
-        await notifications.apply(plans: desired)
+        let authorization = await notifications.authorizationStatus()
+        let failures = await notifications.apply(plans: desired)
+        for r in pending() where r.dueDate != nil {
+            let plans = NotificationPlanner.plans(for: r, calendar: calendar, now: now())
+            let ids = Set(plans.map(\.identifier))
+            let own = failures.filter { ids.contains($0.key) }
+            scheduleStatuses[r.id] = plans.isEmpty ? .noAlertNeeded : Self.status(authorization: authorization, failures: own, plans: plans)
+        }
         let orphans = pendingIDs.subtracting(expected)
         await notifications.remove(identifiers: Array(orphans))
     }
@@ -364,9 +394,35 @@ final class ReminderService {
         let planned = Set(plans.map(\.identifier))
         let stale = NotificationPlanner.identifiers(for: reminder).filter { !planned.contains($0) }
         await notifications.remove(identifiers: stale)
-        await notifications.apply(plans: plans)
-        reminder.notificationIdentifier = plans.isEmpty ? nil : reminder.notificationRequestIdentifier
+        guard !plans.isEmpty else {
+            scheduleStatuses[reminder.id] = .noAlertNeeded
+            reminder.notificationIdentifier = nil
+            try? store.save()
+            return
+        }
+        let authorization = await notifications.authorizationStatus()
+        let failures = await notifications.apply(plans: plans)
+        reminder.notificationIdentifier = reminder.notificationRequestIdentifier
         try? store.save()
+        scheduleStatuses[reminder.id] = Self.status(authorization: authorization, failures: failures, plans: plans)
+    }
+
+    static func status(authorization: UNAuthorizationStatus, failures: [String: String], plans: [NotificationPlan]) -> ScheduleStatus {
+        if let failure = failures.values.first { return .failed(failure) }
+        switch authorization {
+        case .denied: return .notificationsDenied
+        case .notDetermined: return .notDetermined
+        default: break
+        }
+        return plans.contains { $0.repeating != nil } ? .repeating : .scheduled
+    }
+
+    /// Re-runs notification sync for a reminder (used after restoring from a snapshot).
+    func resync(_ reminder: Reminder) async { await syncNotifications(for: reminder) }
+
+    func scheduleStatus(for reminder: Reminder) -> ScheduleStatus {
+        if !reminder.isPending || reminder.dueDate == nil { return .noAlertNeeded }
+        return scheduleStatuses[reminder.id] ?? .unknown
     }
 
     private func keepTranscript(_ transcript: String?) -> String? {
@@ -374,5 +430,5 @@ final class ReminderService {
         return transcript
     }
 
-    func summary(_ reminder: Reminder) -> ReminderSummary { ReminderSummary(reminder, calendar: calendar) }
+    func summary(_ reminder: Reminder) -> ReminderSummary { ReminderSummary(reminder, calendar: calendar, scheduleStatus: scheduleStatus(for: reminder)) }
 }

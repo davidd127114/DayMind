@@ -35,7 +35,7 @@ final class AssistantEngineAcceptanceTests: XCTestCase {
 
         // 3
         r = await env.assistant.handle("Remember that Michael prefers afternoon appointments.", source: .text)
-        XCTAssertTrue(r.responseText.hasPrefix("Got it. I'll remember that"), r.responseText)
+        XCTAssertTrue(r.responseText.hasPrefix("Noted."), r.responseText)
         let memories = env.memories.fetchAll()
         XCTAssertEqual(memories.count, 1)
         XCTAssertEqual(memories[0].category, .preference)
@@ -54,7 +54,7 @@ final class AssistantEngineAcceptanceTests: XCTestCase {
 
         // 6 — "that" refers to the reminder just changed
         r = await env.assistant.handle("Snooze that for two hours.", source: .text)
-        XCTAssertTrue(r.responseText.contains("Snoozed “Call Michael” until Friday, September 4 at 12:00 PM"), r.responseText)
+        XCTAssertTrue(r.responseText.contains("Snoozed. Call Michael — Friday, September 4 at 12:00 PM"), r.responseText)
         XCTAssertDate(call.dueDate, 2026, 9, 4, 12, 0)
         XCTAssertEqual(call.snoozeHistory.count, 1)
 
@@ -65,7 +65,7 @@ final class AssistantEngineAcceptanceTests: XCTestCase {
 
         // 8 — "this" = most recently touched item (the call reminder)
         r = await env.assistant.handle("Save this under the kitchen renovation project.", source: .text)
-        XCTAssertTrue(r.responseText.contains("Filed “Call Michael” under Kitchen Renovation"), r.responseText)
+        XCTAssertTrue(r.responseText.contains("Filed Call Michael under Kitchen Renovation"), r.responseText)
         XCTAssertEqual(call.project?.name, "Kitchen Renovation")
         XCTAssertEqual(env.projects.all().count, 1)
 
@@ -82,7 +82,7 @@ final class AssistantEngineAcceptanceTests: XCTestCase {
 
         r = await env.assistant.handle("Delete all of my reminders.", source: .text)
         r = await env.assistant.handle("yes", source: .text)
-        XCTAssertTrue(r.responseText.contains("Deleted 2 reminders"), r.responseText)
+        XCTAssertTrue(r.responseText.contains("Removed 2 reminders"), r.responseText)
         XCTAssertTrue(env.reminders.fetchAll().isEmpty)
         XCTAssertTrue(mock.scheduled.isEmpty)
     }
@@ -92,8 +92,8 @@ final class AssistantEngineAcceptanceTests: XCTestCase {
         XCTAssertEqual(env.memories.fetchAll().count, 1)
         XCTAssertEqual(env.reminders.pending().count, 1)
         XCTAssertEqual(env.reminders.pending().first?.title, "Message John")
-        XCTAssertTrue(r.responseText.contains("Got it. I'll remember that"), r.responseText)
-        XCTAssertTrue(r.responseText.contains("Done. I'll remind you to message John tomorrow"), r.responseText)
+        XCTAssertTrue(r.responseText.contains("Noted. John prefers text messages."), r.responseText)
+        XCTAssertTrue(r.responseText.contains("Certainly. Message John — tomorrow at 9:00 AM."), r.responseText)
     }
 
     func testAmbiguousTimeAsksOneQuestionAndSavesNothing() async {
@@ -129,7 +129,7 @@ final class AssistantEngineAcceptanceTests: XCTestCase {
         XCTAssertEqual(candidates.count, 2)
         XCTAssertEqual(env.reminders.pending().count, 2, "nothing changes until the user chooses")
         let chosen = await env.assistant.choose(reminderID: bank.id)
-        XCTAssertTrue(chosen.responseText.contains("Marked “Call the bank” as done"), chosen.responseText)
+        XCTAssertTrue(chosen.responseText.contains("Done. Call the bank."), chosen.responseText)
         XCTAssertEqual(bank.status, .completed)
     }
 
@@ -139,7 +139,7 @@ final class AssistantEngineAcceptanceTests: XCTestCase {
         guard case .createReminderDespiteDuplicate? = r.pending else { return XCTFail("expected duplicate confirmation") }
         XCTAssertEqual(env.reminders.pending().count, 1)
         let confirmed = await env.assistant.confirmPending()
-        XCTAssertTrue(confirmed.responseText.contains("Done."), confirmed.responseText)
+        XCTAssertTrue(confirmed.responseText.contains("Certainly."), confirmed.responseText)
         XCTAssertEqual(env.reminders.pending().count, 2)
     }
 
@@ -150,7 +150,7 @@ final class AssistantEngineAcceptanceTests: XCTestCase {
         let reminder = env.reminders.pending()[0]
         XCTAssertDate(reminder.followUpDate, 2026, 9, 3, 9, 0)
         XCTAssertNotNil(mock.scheduled[reminder.followUpNotificationIdentifier])
-        XCTAssertTrue(r.responseText.contains("I'll remind you again tomorrow at 9:00 AM"), r.responseText)
+        XCTAssertTrue(r.responseText.contains("once more tomorrow at 9:00 AM"), r.responseText)
     }
 
     func testBriefingAndForgottenYesterday() async throws {

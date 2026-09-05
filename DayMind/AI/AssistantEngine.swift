@@ -43,6 +43,8 @@ final class AssistantEngine {
     private(set) var pendingAction: PendingAction?
     private(set) var lastResult: AssistantResult?
     private(set) var lastAvailability: AIAvailability = .notSupportedByThisBuild
+    /// Real reversals available for records shown on screen (record id → operation).
+    private(set) var undoRegistry: [UUID: UndoOperation] = [:]
 
     var now: () -> Date = { Date() }
 
@@ -210,6 +212,50 @@ final class AssistantEngine {
         return finishSimple(mode: mode)
     }
 
+    // MARK: - Undo and card controls
+
+    func canUndo(_ record: ActionRecord) -> Bool { undoRegistry[record.id] != nil }
+
+    /// Reverses a previous action. Only offered where a genuine reversal exists.
+    func undo(_ record: ActionRecord) async -> AssistantResult {
+        guard let operation = undoRegistry[record.id] else {
+            return AssistantResult(responseText: "There's nothing to undo for that.", actions: [], mode: mode)
+        }
+        undoRegistry[record.id] = nil
+        actions.log.reset()
+        do {
+            switch operation {
+            case .deleteReminder(let id, _):
+                if let r = actions.reminders.fetch(id: id) { try await actions.reminders.delete(r) }
+                if actions.focusReminderID == id { actions.focusReminderID = nil }
+            case .restoreReminderState(let id, _, let due, let status, let completedAt, let followUp, let dropLastSnooze):
+                guard let r = actions.reminders.fetch(id: id) else { throw ReminderServiceError.notFound }
+                try await actions.reminders.restore(r, dueDate: due, status: status, completedAt: completedAt, followUpDate: followUp, dropLastSnooze: dropLastSnooze)
+                actions.focusReminderID = id
+            case .restoreReminder(let snapshot):
+                let r = try await actions.reminders.restore(snapshot)
+                actions.focusReminderID = r.id
+            case .deleteMemory(let id, _):
+                if let m = actions.memories.fetch(id: id) { try actions.memories.delete(m) }
+                if actions.lastSavedMemoryID == id { actions.lastSavedMemoryID = nil }
+            case .restoreMemory(let snapshot):
+                let m = try actions.memories.restore(snapshot)
+                actions.lastSavedMemoryID = m.id
+            }
+            actions.log.record(.undone(operation.description))
+        } catch {
+            actions.log.record(.failed(operation: "undo that", message: error.localizedDescription))
+        }
+        return finishSimple(mode: mode)
+    }
+
+    /// "Done" on a confirmation card.
+    func complete(reminderID: UUID) async -> AssistantResult {
+        actions.log.reset()
+        _ = await actions.completeReminder(query: nil, id: reminderID.uuidString)
+        return finishSimple(mode: mode)
+    }
+
     // MARK: - Deterministic path
 
     private func runDeterministic(_ intent: InterpretedIntent, text: String, source: CaptureSource, mode: AssistantMode, note: String? = nil) async -> AssistantResult {
@@ -290,6 +336,7 @@ final class AssistantEngine {
             inboxID = item?.id
         }
         pendingAction = actions.log.pending
+        undoRegistry.merge(actions.log.undoOperations) { _, new in new }
         let composer = ResponseComposer(now: now(), calendar: calendar)
         let response = composer.compose(records: records, modelText: modelText, pending: pendingAction)
         let result = AssistantResult(responseText: response, actions: records, mode: mode, pending: pendingAction,
@@ -301,6 +348,7 @@ final class AssistantEngine {
 
     private func finishSimple(mode: AssistantMode) -> AssistantResult {
         pendingAction = actions.log.pending
+        undoRegistry.merge(actions.log.undoOperations) { _, new in new }
         let composer = ResponseComposer(now: now(), calendar: calendar)
         let response = composer.compose(records: actions.log.records, modelText: nil, pending: pendingAction)
         let result = AssistantResult(responseText: response, actions: actions.log.records, mode: mode, pending: pendingAction)
@@ -372,6 +420,7 @@ final class AssistantEngine {
         case .notFound: return "Not found"
         case .failed(let op, _): return "Failed to \(op)"
         case .savedToInbox: return "Saved to Inbox"
+        case .undone(let d): return "Undone: \(d)"
         }
     }
 }

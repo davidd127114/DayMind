@@ -68,6 +68,7 @@ targets:
     scheme:
       testTargets:
         - DayMindTests
+        - DayMindUITests
       gatherCoverageData: true
       environmentVariables:
         DAYMIND_SEED_SAMPLE_DATA: "1"
@@ -102,3 +103,15 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.dabkowski.DayMindTests
         GENERATE_INFOPLIST_FILE: YES
+  DayMindUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: DayMindUITests
+    dependencies:
+      - target: DayMind
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.dabkowski.DayMindUITests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: DayMind

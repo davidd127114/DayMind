@@ -11,10 +11,22 @@ final class MockNotificationScheduler: NotificationScheduling, @unchecked Sendab
     var removed: [String] = []
     var briefing: (time: TimeOfDay, title: String, body: String)?
     var authorized = true
+    /// Identifiers that should fail to schedule (simulates iOS refusing a request).
+    var failing: Set<String> = []
+    var failAll = false
+    var testNotifications = 0
 
     func requestAuthorization() async -> Bool { authorized }
     func authorizationStatus() async -> UNAuthorizationStatus { authorized ? .authorized : .denied }
-    func apply(plans: [NotificationPlan]) async { for p in plans { scheduled[p.identifier] = p } }
+    func apply(plans: [NotificationPlan]) async -> [String: String] {
+        var failures: [String: String] = [:]
+        for p in plans {
+            if failAll || failing.contains(p.identifier) { failures[p.identifier] = "simulated scheduling failure"; continue }
+            scheduled[p.identifier] = p
+        }
+        return failures
+    }
+    func scheduleTestNotification(after seconds: TimeInterval) async -> String? { testNotifications += 1; return nil }
     func remove(identifiers: [String]) async {
         for id in identifiers { scheduled.removeValue(forKey: id); removed.append(id) }
     }

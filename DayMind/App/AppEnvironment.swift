@@ -77,7 +77,11 @@ final class AppEnvironment {
         guard !launched else { return }
         launched = true
         await syncPreferencesWithDatabase()
-        if SampleData.isRequestedByEnvironment, !settings.hasSeededSampleData, reminders.fetchAll().isEmpty, memories.fetchAll(includeArchived: true).isEmpty {
+        if LaunchOptions.isUITesting {
+            // Screenshot tests: deterministic content, no first-run sheet.
+            settings.hasCompletedOnboarding = true
+            if reminders.fetchAll().isEmpty { await SampleData.seed(into: self) }
+        } else if SampleData.isRequestedByEnvironment, !settings.hasSeededSampleData, reminders.fetchAll().isEmpty, memories.fetchAll(includeArchived: true).isEmpty {
             await SampleData.seed(into: self)
         }
         await onForeground()
