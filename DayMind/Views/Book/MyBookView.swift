@@ -27,20 +27,24 @@ struct MyBookView: View {
 
     var body: some View {
         @Bindable var router = router
-        List {
-            Section { filterChips.listRowInsets(EdgeInsets()).listRowBackground(Color.clear) }
-            if filter == .needsAttention || (filter == .all && !inbox.isEmpty && query.isEmpty) { needsAttentionSection }
-            if filter == .all || filter == .upcoming { remindersSection }
-            if filter == .completed { completedSection }
-            if filter == .all || filter == .memories { memoriesSection }
-            if let retryResult {
-                Section("Last retry") {
-                    Text(retryResult.responseText).font(.footnote).foregroundStyle(ButlerTheme.inkSecondary)
+        VStack(spacing: 0) {
+            filterChips
+                .padding(.horizontal, 16)
+                .padding(.bottom, 4)
+            List {
+                if filter == .needsAttention || (filter == .all && !inbox.isEmpty && query.isEmpty) { needsAttentionSection }
+                if filter == .all || filter == .upcoming { remindersSection }
+                if filter == .completed { completedSection }
+                if filter == .all || filter == .memories { memoriesSection }
+                if let retryResult {
+                    Section("Last retry") {
+                        Text(retryResult.responseText).font(.footnote).foregroundStyle(ButlerTheme.inkSecondary)
+                    }
                 }
             }
+            .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
         }
-        .listStyle(.insetGrouped)
-        .scrollContentBackground(.hidden)
         .background(ButlerTheme.ivory)
         .searchable(text: $router.bookSearch, prompt: "Search reminders, notes, people, projects")
         .navigationTitle("My Book")
@@ -89,6 +93,7 @@ struct MyBookView: View {
             }
             .padding(.horizontal, 4).padding(.vertical, 6)
         }
+        .scrollClipDisabled()
     }
 
     // MARK: Sections

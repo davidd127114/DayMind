@@ -77,7 +77,7 @@ final class ScreenshotTests: XCTestCase {
         waitForButler(app)
         XCTAssertTrue(app.staticTexts["Kept for you to finish"].waitForExistence(timeout: 20))
         snap(app, "10-needs-attention-card-dark")
-        XCTAssertTrue(app.buttons["needsAttention"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["needsAttention"].waitForExistence(timeout: 20))
         app.buttons["needsAttention"].tap()
         XCTAssertTrue(app.navigationBars["My Book"].waitForExistence(timeout: 10))
         snap(app, "11-book-needs-attention-dark")

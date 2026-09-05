@@ -185,7 +185,8 @@ final class AssistantEngineFailureTests: XCTestCase {
         let r = await env.assistant.handle("Remind me tomorrow at 3 PM to call Michael.", source: .voice)
         XCTAssertEqual(env.reminders.pending().count, 1)
         XCTAssertTrue(r.responseText.contains("tomorrow at 3:00 PM"), r.responseText)
-        XCTAssertTrue(r.responseText.contains("snag"), "explains that the rules path was used: \(r.responseText)")
+        XCTAssertFalse(r.responseText.lowercased().contains("error"), "no technical error text reaches the user: \(r.responseText)")
+        XCTAssertEqual(r.responseText, "Certainly. Call Michael — tomorrow at 3:00 PM.")
     }
 
     func testModelFailureKeepsUnclearRequestsInInbox() async {

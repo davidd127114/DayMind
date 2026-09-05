@@ -27,9 +27,9 @@ enum ButlerTheme {
                                   dark: UIColor(red: 0.35, green: 0.30, blue: 0.18, alpha: 1))
     /// Jacket colours.
     static let jacket = dynamic(light: UIColor(red: 0.13, green: 0.13, blue: 0.15, alpha: 1),
-                                dark: UIColor(red: 0.09, green: 0.09, blue: 0.11, alpha: 1))
+                                dark: UIColor(red: 0.16, green: 0.16, blue: 0.19, alpha: 1))
     static let jacketHighlight = dynamic(light: UIColor(red: 0.22, green: 0.22, blue: 0.25, alpha: 1),
-                                         dark: UIColor(red: 0.17, green: 0.17, blue: 0.20, alpha: 1))
+                                         dark: UIColor(red: 0.26, green: 0.26, blue: 0.30, alpha: 1))
     static let shirt = dynamic(light: UIColor(red: 0.99, green: 0.98, blue: 0.96, alpha: 1),
                                dark: UIColor(red: 0.93, green: 0.91, blue: 0.87, alpha: 1))
     static let bowTie = dynamic(light: UIColor(red: 0.10, green: 0.10, blue: 0.12, alpha: 1),

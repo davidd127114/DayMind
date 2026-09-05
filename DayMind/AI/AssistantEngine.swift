@@ -117,13 +117,13 @@ final class AssistantEngine {
                               inboxReason: (actions.log.records.isEmpty && ruleIntent == .unknown && Self.looksLikeCommand(text)) ? .ambiguous : nil)
             } catch let error as AIProcessingError {
                 logger.error("Provider failed: \(error.localizedDescription, privacy: .public)")
-                if Self.isConfident(ruleIntent) {
+                if ruleIntent != .unknown {
                     return await runDeterministic(ruleIntent, text: text, source: source, mode: .deterministic, note: error.localizedDescription)
                 }
                 return saveToInbox(text: text, source: source, reason: error.inboxReason, detail: error.localizedDescription, mode: .deterministic, ruleIntent: ruleIntent)
             } catch {
                 logger.error("Provider threw: \(error.localizedDescription, privacy: .public)")
-                if Self.isConfident(ruleIntent) {
+                if ruleIntent != .unknown {
                     return await runDeterministic(ruleIntent, text: text, source: source, mode: .deterministic, note: error.localizedDescription)
                 }
                 return saveToInbox(text: text, source: source, reason: .modelFailed, detail: error.localizedDescription, mode: .deterministic, ruleIntent: ruleIntent)
