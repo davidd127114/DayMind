@@ -69,9 +69,6 @@ struct MyBookView: View {
         .sheet(isPresented: $creatingMemory) { NavigationStack { MemoryEditorView(mode: .create(prefill: nil)) } }
         .sheet(item: $inboxToReminder) { item in NavigationStack { ReminderEditorView(mode: .create(prefill: prefillReminder(item)), inboxItemToResolve: item) } }
         .sheet(item: $inboxToMemory) { item in NavigationStack { MemoryEditorView(mode: .create(prefill: prefillMemory(item)), inboxItemToResolve: item) } }
-        .navigationDestination(for: UUID.self) { id in
-            if let m = env.memories.fetch(id: id) { MemoryDetailView(memory: m) } else { Text("Not found") }
-        }
     }
 
     // MARK: Filters
@@ -98,7 +95,6 @@ struct MyBookView: View {
             }
             .padding(.horizontal, 4).padding(.vertical, 6)
         }
-        .scrollClipDisabled()
     }
 
     // MARK: Sections

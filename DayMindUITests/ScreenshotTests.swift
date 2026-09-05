@@ -25,6 +25,20 @@ final class ScreenshotTests: XCTestCase {
         XCTAssertTrue(app.buttons["butlerMic"].waitForExistence(timeout: 20), "Butler screen did not appear")
     }
 
+    /// Diagnostic: capture the raw screen (no element queries) a few seconds after opening My Book,
+    /// so a rendering problem can be told apart from an accessibility-snapshot problem.
+    func test00RawScreenAfterOpeningBook() {
+        let app = launch(["-daymind-theme", "light"])
+        waitForButler(app)
+        app.buttons["openMyBook"].tap()
+        sleep(3)
+        let a = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        a.name = "00-raw-book-after-3s"; a.lifetime = .keepAlways; add(a)
+        sleep(6)
+        let b = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        b.name = "00-raw-book-after-9s"; b.lifetime = .keepAlways; add(b)
+    }
+
     func test01ButlerAndBookLight() {
         let app = launch(["-daymind-theme", "light"])
         waitForButler(app)

@@ -13,6 +13,9 @@ struct RootView: View {
                 .navigationDestination(isPresented: $router.showMyBook) {
                     MyBookView()
                 }
+                .navigationDestination(for: UUID.self) { id in
+                    if let m = env.memories.fetch(id: id) { MemoryDetailView(memory: m) } else { Text("Not found") }
+                }
         }
         .tint(ButlerTheme.gold)
         .sheet(isPresented: $router.showSettings) {
