@@ -28,18 +28,8 @@ struct MyBookView: View {
     private var filter: BookFilter { router.bookFilter }
     private var query: String { searchText.trimmingCharacters(in: .whitespacesAndNewlines) }
 
-    /// Diagnostic knob used only by the screenshot tests: renders progressively more of the screen
-    /// (0 = placeholder … 99 = everything) so a freeze can be pinned to one piece.
-    private var variant: Int { LaunchOptions.value(after: "-daymind-book-variant").flatMap(Int.init) ?? 99 }
-
     var body: some View {
-        Group {
-            if variant == 0 {
-                Text("My Book placeholder").foregroundStyle(ButlerTheme.ink)
-            } else {
-                fullBody
-            }
-        }
+        fullBody
         .navigationTitle("My Book")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
@@ -62,19 +52,16 @@ struct MyBookView: View {
         .sheet(item: $inboxToMemory) { item in NavigationStack { MemoryEditorView(mode: .create(prefill: prefillMemory(item)), inboxItemToResolve: item) } }
     }
 
-    @ViewBuilder
     private var fullBody: some View {
-        let content = VStack(spacing: 0) {
-            if variant >= 4 {
-                filterChips
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 4)
-            }
+        VStack(spacing: 0) {
+            filterChips
+                .padding(.horizontal, 16)
+                .padding(.bottom, 4)
             List {
-                if variant >= 3, filter == .needsAttention || (filter == .all && !inbox.isEmpty && query.isEmpty) { needsAttentionSection }
-                if variant >= 1, filter == .all || filter == .upcoming { remindersSection }
+                if filter == .needsAttention || (filter == .all && !inbox.isEmpty && query.isEmpty) { needsAttentionSection }
+                if filter == .all || filter == .upcoming { remindersSection }
                 if filter == .completed { completedSection }
-                if variant >= 2, filter == .all || filter == .memories { memoriesSection }
+                if filter == .all || filter == .memories { memoriesSection }
                 if let retryResult {
                     Section("Last retry") {
                         Text(retryResult.responseText).font(.footnote).foregroundStyle(ButlerTheme.inkSecondary)
@@ -85,11 +72,7 @@ struct MyBookView: View {
             .scrollContentBackground(.hidden)
         }
         .background(ButlerTheme.ivory)
-        if variant >= 5 {
-            content.searchable(text: $searchText, prompt: "Search reminders, notes, people, projects")
-        } else {
-            content
-        }
+        .searchable(text: $searchText, prompt: "Search reminders, notes, people, projects")
     }
 
     // MARK: Filters
@@ -215,16 +198,9 @@ struct MyBookView: View {
                         Text(Self.relative(item.capturedAt))
                     }
                     .font(.caption).foregroundStyle(ButlerTheme.inkSecondary)
-                    HStack {
-                        Button {
-                            retrying = item.id
-                            Task { retryResult = await env.assistant.retry(item); retrying = nil }
-                        } label: {
-                            if retrying == item.id { ProgressView().controlSize(.small) } else { Label("Try again", systemImage: "arrow.clockwise") }
-                        }
-                        .disabled(retrying != nil)
-                        Button { inboxToReminder = item } label: { Label("Reminder", systemImage: "bell") }
-                        Button { inboxToMemory = item } label: { Label("Note", systemImage: "book.closed") }
+                    ViewThatFits(in: .horizontal) {
+                        HStack(spacing: 8) { inboxButtons(item) }
+                        VStack(alignment: .leading, spacing: 8) { inboxButtons(item) }
                     }
                     .buttonStyle(.bordered)
                     .tint(ButlerTheme.ink)
@@ -248,6 +224,19 @@ struct MyBookView: View {
         let f = RelativeDateTimeFormatter()
         f.unitsStyle = .short
         return f.localizedString(for: date, relativeTo: Date())
+    }
+
+    @ViewBuilder
+    private func inboxButtons(_ item: InboxItem) -> some View {
+        Button {
+            retrying = item.id
+            Task { retryResult = await env.assistant.retry(item); retrying = nil }
+        } label: {
+            if retrying == item.id { ProgressView().controlSize(.small) } else { Label("Try again", systemImage: "arrow.clockwise").lineLimit(1).fixedSize() }
+        }
+        .disabled(retrying != nil)
+        Button { inboxToReminder = item } label: { Label("Make reminder", systemImage: "bell").lineLimit(1).fixedSize() }
+        Button { inboxToMemory = item } label: { Label("Save as note", systemImage: "book.closed").lineLimit(1).fixedSize() }
     }
 
     // MARK: Inbox conversions

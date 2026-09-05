@@ -5,6 +5,26 @@ the stated platform, or a manual check was performed there. Nothing below is mar
 physical iPhone yet — the project was authored on a Windows PC and built/tested on GitHub's macOS 26
 runners (Xcode 26.6, iOS 26 simulator), which have no microphone and no Apple Intelligence.
 
+## Butler redesign (5 Sep 2026, evening) - verified on CI
+
+Run 33991305022 (Xcode 26.6, iOS 26 simulator): **62 unit tests passed, 1 skipped (live model), all
+screenshot UI tests passed.** The UI tests launch the real app and capture the Butler screen (light,
+dark, largest accessibility text), My Book (all filters incl. Needs attention), a typed request
+producing a confirmation card with Edit / Undo / Done, a clarification state and a not-understood
+request landing in Needs attention. The PNGs are the `screenshots` artifact of each CI run and were
+inspected; fixes made from them: technical model errors no longer appear in the butler's reply,
+the header no longer wraps letter-by-letter at accessibility sizes, inbox card buttons stack
+vertically when they don't fit, dark-mode jacket contrast raised.
+
+New reliability tests: saved-and-scheduled vs saved-but-notifications-off vs saved-but-scheduling-failed
+wording; undo for create / complete / snooze / delete / remember; editing cancels the obsolete alert;
+memories survive a store relaunch; photo dates found by the text detector require confirmation and
+photo text is never treated as a command; polish validator rejects added meaning; polish off by default.
+
+A real bug found and fixed by the screenshot tests: binding My Book's push to the observable
+router (`navigationDestination(isPresented:)`) froze the app on navigation; the stack now uses a
+path (`NavigationStack(path:)`).
+
 ## A. Verified by automated tests on macOS / iOS 26 simulator (CI)
 
 Latest green run: GitHub Actions run 33893073937 on 4 September 2026 — Xcode 26.6, iOS 26 simulator.

@@ -9,10 +9,11 @@ projects and decisions. Two screens: **Butler** and **My Book**.
 Foundation Models framework) on the iPhone itself. When Apple Intelligence is unavailable, a
 deterministic offline parser and a manual form keep everything working.
 
-> Status: Milestones 1–5 implemented. CI on GitHub's macOS 26 runner is green: 44 core tests and
-> 42 app tests pass on the iOS 26 simulator (1 live-model test skipped there). Voice capture, spoken
-> replies, notification delivery, Siri/Action Button and CloudKit still need a physical iPhone —
-> see [docs/TEST-STATUS.md](docs/TEST-STATUS.md) for the exact split.
+> Status: butler redesign complete. CI on GitHub's macOS 26 runner is green: 53 core tests,
+> 62 app tests (1 live-model test skipped there) and 7 screenshot UI tests pass on the iOS 26
+> simulator. Voice capture, spoken replies, notification delivery, photos from the camera,
+> Siri/Action Button and CloudKit still need a physical iPhone; see
+> [docs/TEST-STATUS.md](docs/TEST-STATUS.md) for the exact split.
 
 ## What it does
 
