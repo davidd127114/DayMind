@@ -51,6 +51,17 @@
                ReferencedContainer = "container:DayMind.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "FA5C223FC6055BDB8B1139EB"
+               BuildableName = "DayMindUITests.xctest"
+               BlueprintName = "DayMindUITests"
+               ReferencedContainer = "container:DayMind.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>
