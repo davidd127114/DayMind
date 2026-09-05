@@ -16,7 +16,8 @@ enum AssistantMode: String, Sendable {
 }
 
 /// What the Talk screen renders after one request.
-struct AssistantResult: Equatable, Sendable {
+struct AssistantResult: Equatable, Sendable, Identifiable {
+    let id = UUID()
     var responseText: String
     var actions: [ActionRecord]
     var mode: AssistantMode

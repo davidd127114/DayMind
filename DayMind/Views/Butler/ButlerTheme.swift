@@ -55,19 +55,13 @@ struct TagView: View {
     let text: String
     var systemImage: String? = nil
     var body: some View {
-        Label {
+        HStack(spacing: 4) {
+            if let systemImage { Image(systemName: systemImage).accessibilityHidden(true) }
             Text(text)
-        } icon: {
-            if let systemImage { Image(systemName: systemImage) }
         }
-        .labelStyle(systemImage == nil ? .titleOnly : .titleAndIcon)
         .font(.caption)
         .padding(.horizontal, 8).padding(.vertical, 3)
         .background(ButlerTheme.goldSoft.opacity(0.6), in: Capsule())
         .foregroundStyle(ButlerTheme.ink)
     }
-}
-
-extension LabelStyle where Self == TitleOnlyLabelStyle {
-    static var titleOnlyStyle: TitleOnlyLabelStyle { .titleOnly }
 }
