@@ -1,4 +1,5 @@
 import SwiftUI
+import Darwin
 
 /// Two screens only: the Butler (home) and My Book (pushed). Everything else is a sheet.
 struct RootView: View {
@@ -8,13 +9,15 @@ struct RootView: View {
 
     var body: some View {
         @Bindable var router = router
-        NavigationStack {
+        NavigationStack(path: $router.path) {
             ButlerView()
-                .navigationDestination(isPresented: $router.showMyBook) {
-                    MyBookView()
-                }
-                .navigationDestination(for: UUID.self) { id in
-                    if let m = env.memories.fetch(id: id) { MemoryDetailView(memory: m) } else { Text("Not found") }
+                .navigationDestination(for: Route.self) { route in
+                    switch route {
+                    case .book:
+                        MyBookView()
+                    case .memory(let id):
+                        if let m = env.memories.fetch(id: id) { MemoryDetailView(memory: m) } else { Text("Not found") }
+                    }
                 }
         }
         .tint(ButlerTheme.gold)
@@ -36,6 +39,7 @@ struct RootView: View {
                     .accessibilityAddTraits(.isStaticText)
             }
         }
+        .onAppear { if LaunchOptions.isUITesting { MainThreadWatchdog.start() } }
         .preferredColorScheme(LaunchOptions.forcedColorScheme)
         .dynamicTypeSize(LaunchOptions.forcedTextSize.map { $0...$0 } ?? DynamicTypeSize.xSmall...DynamicTypeSize.accessibility5)
     }
@@ -70,4 +74,37 @@ enum LaunchOptions {
 
     /// A request the Butler should process right after launch (deterministic confirmation screenshot).
     static var demoRequest: String? { value(after: "-daymind-demo-request") }
+}
+
+/// UI-test-only diagnostic: if the main thread stops answering for a few seconds, print its stack
+/// trace to stderr (which the CI test log captures) so hangs can be located precisely.
+enum MainThreadWatchdog {
+    nonisolated(unsafe) private static var lastPong = Date()
+    nonisolated(unsafe) private static var started = false
+
+    static func start() {
+        guard !started else { return }
+        started = true
+        let mainThread = pthread_self()
+        signal(SIGUSR1) { _ in
+            var addresses = [UnsafeMutableRawPointer?](repeating: nil, count: 64)
+            let count = backtrace(&addresses, 64)
+            backtrace_symbols_fd(&addresses, count, STDERR_FILENO)
+        }
+        Thread.detachNewThread {
+            while true {
+                Thread.sleep(forTimeInterval: 1)
+                let sent = Date()
+                DispatchQueue.main.async { lastPong = Date() }
+                Thread.sleep(forTimeInterval: 4)
+                if lastPong < sent {
+                    fputs("
+===== DAYMIND WATCHDOG: main thread unresponsive for 4s; main-thread backtrace follows =====
+", stderr)
+                    pthread_kill(mainThread, SIGUSR1)
+                    Thread.sleep(forTimeInterval: 15)
+                }
+            }
+        }
+    }
 }

@@ -26,12 +26,22 @@ enum BookFilter: String, CaseIterable, Identifiable, Hashable {
     }
 }
 
+/// Pushed destinations from the Butler screen.
+enum Route: Hashable {
+    case book
+    case memory(UUID)
+}
+
 /// Navigation state shared by the two screens, deep links, notifications and App Intents.
 @MainActor
 @Observable
 final class AppRouter {
-    /// My Book is a pushed destination from the Butler screen.
-    var showMyBook = false
+    /// Navigation path of the single stack (empty = Butler screen).
+    var path: [Route] = []
+    var showMyBook: Bool {
+        get { path.first == .book }
+        set { if newValue { if path.first != .book { path = [.book] } } else { path.removeAll() } }
+    }
     var bookFilter: BookFilter = .all
     var bookSearch = ""
     var showSettings = false

@@ -186,7 +186,7 @@ struct MyBookView: View {
                 Text(query.isEmpty ? "Nothing remembered yet. Say “Remember that…”." : "No notes match “\(query)”.").foregroundStyle(ButlerTheme.inkSecondary)
             }
             ForEach(items) { m in
-                NavigationLink(value: m.id) { MemoryRow(memory: m) }
+                NavigationLink(value: Route.memory(m.id)) { MemoryRow(memory: m) }
                     .listRowBackground(ButlerTheme.card)
                     .swipeActions {
                         Button(role: .destructive) { try? env.memories.delete(m) } label: { Label("Delete", systemImage: "trash") }
