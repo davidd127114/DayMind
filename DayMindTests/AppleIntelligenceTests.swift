@@ -67,13 +67,20 @@ final class AppleIntelligenceTests: XCTestCase {
         }
         let (env, _) = TestEnv.make(provider: AppleIntelligenceProvider(), now: Date())
         let r = await env.assistant.handle("Remind me tomorrow at 3 PM to call Michael.", source: .text)
+        if r.mode == .deterministic {
+            // The model reported itself available but could not serve the request (seen on CI hosts
+            // where the assets are not really usable). The engine's fallback did the work; that path is
+            // covered elsewhere, so this live test is skipped rather than falsely passed.
+            throw XCTSkip("Model was reported available but the request fell back to rules: \(r.responseText)")
+        }
         XCTAssertEqual(r.mode, .appleIntelligence)
         let pending = env.reminders.pending()
         XCTAssertEqual(pending.count, 1, r.responseText)
         XCTAssertTrue(pending.first?.title.localizedCaseInsensitiveContains("Michael") == true)
-        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
-        XCTAssertTrue(Calendar.current.isDate(pending.first!.dueDate!, inSameDayAs: tomorrow))
-        XCTAssertEqual(Calendar.current.component(.hour, from: pending.first!.dueDate!), 15)
+        let calendar = env.settings.calendar
+        let tomorrow = calendar.date(byAdding: .day, value: 1, to: Date())!
+        XCTAssertTrue(calendar.isDate(pending.first!.dueDate!, inSameDayAs: tomorrow))
+        XCTAssertEqual(calendar.component(.hour, from: pending.first!.dueDate!), 15)
 
         let m = await env.assistant.handle("Remember that Michael prefers afternoon appointments.", source: .text)
         XCTAssertEqual(env.memories.fetchAll().count, 1, m.responseText)

@@ -12,7 +12,11 @@ Core package: **44 passed, 0 failed.** App bundle: **42 passed, 0 failed, 1 skip
 Apple Intelligence test, skipped because the runner has no Apple Intelligence). The core package
 also passes on Windows with the Swift 6.3 toolchain.
 
-Core package (`swift test`, 44 tests):
+Update 5 Sep 2026: core package now **53 tests** (added `EverydayPhrasingTests` for casual phrasings: "set a reminder for…", "don't let me forget…", "half past 3", "5 tonight", "a week from today", "Tuesday next week", "make it 5 pm", "push it to tomorrow", "done", "scratch that", "what do I have tomorrow", "good morning" → briefing, plain statements like "John's birthday is March 3" saved as memories). On one CI run the macOS host reported Apple Intelligence *available* but had no model assets; DayMind's engine detected the failure and completed the request through the offline rules — a real-world confirmation of the fallback path.
+
+**Physical device (iPhone 14 Pro Max, iOS 26.6, no Apple Intelligence), 5 Sep 2026:** installed via Sideloadly; app launches, Developer Mode/Trust flow works, the offline path is the active mode. Detailed feature checks on device are still pending user reports.
+
+Core package (`swift test`, 44 tests at first green run):
 * Natural-language dates: tomorrow/next Friday/in two hours/September 11/ISO dates, bare-hour rules, vague words with configurable defaults, remainder cleanup.
 * Recurrence: weekly, first/last weekday of month, monthly day clamping (Jan 31 → Feb 28), every other week, yearly, end dates, **daily rules across the US daylight-saving change (Nov 1 2026 and Mar 8 2026)**, repeating-trigger eligibility, human descriptions, Codable round trip.
 * Deterministic interpreter: all nine acceptance statements plus "every Monday morning", mixed fact+reminder, doctor's-office memory, plumber reschedule, forgotten yesterday, follow-up if incomplete, "later" clarification, complete/delete references, chatter → unknown.
