@@ -27,6 +27,25 @@ jobs:
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
             2>&1 | tee device-build.log | grep -E "error:|BUILD|\*\* " || true
           grep -q "BUILD SUCCEEDED" device-build.log || { grep -E "error:" device-build.log | sort -u | head -60; exit 1; }
+      - name: Ad-hoc sign (gives the binaries a signature and entitlements that sideloading tools can replace)
+        run: |
+          APP=$(find DerivedData/Build/Products/Release-iphoneos -maxdepth 1 -name "DayMind.app" | head -1)
+          test -d "$APP" || { echo "DayMind.app not found"; exit 1; }
+          # Strip capabilities a free Apple ID cannot sign (push, iCloud) from the app's Info.plist.
+          /usr/libexec/PlistBuddy -c "Delete :UIBackgroundModes" "$APP/Info.plist" || true
+          cat > /tmp/ent.plist <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>application-identifier</key><string>TEAMID.com.dabkowski.DayMind</string>
+            <key>get-task-allow</key><true/>
+          </dict></plist>
+          EOF
+          for ext in "$APP"/PlugIns/*.appex; do
+            [ -d "$ext" ] && codesign --force --sign - --entitlements /tmp/ent.plist "$ext"
+          done
+          codesign --force --sign - --entitlements /tmp/ent.plist "$APP"
+          codesign -dvvv "$APP" 2>&1 | grep -E "Identifier|Signature|TeamIdentifier" || true
       - name: Package IPA
         run: |
           APP=$(find DerivedData/Build/Products/Release-iphoneos -maxdepth 1 -name "DayMind.app" | head -1)
@@ -38,6 +57,7 @@ jobs:
           # A copy without the widget/control extension for tools that cannot sign extensions.
           rm -rf ipa2 && mkdir -p ipa2/Payload && cp -R "$APP" ipa2/Payload/
           rm -rf ipa2/Payload/DayMind.app/PlugIns ipa2/Payload/DayMind.app/Extensions
+          codesign --force --sign - --entitlements /tmp/ent.plist ipa2/Payload/DayMind.app
           (cd ipa2 && zip -qry ../DayMind-unsigned-noextension.ipa Payload)
           ls -la DayMind-unsigned-noextension.ipa
       - name: Upload IPA
