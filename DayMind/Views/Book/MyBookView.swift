@@ -21,12 +21,14 @@ struct MyBookView: View {
     @State private var retrying: UUID?
     @State private var retryResult: AssistantResult?
     @State private var now = Date()
+    /// Local copy of the search text: `.searchable` writes its binding during layout, and binding it
+    /// straight to the observable router re-rendered the view endlessly.
+    @State private var searchText = ""
 
     private var filter: BookFilter { router.bookFilter }
-    private var query: String { router.bookSearch.trimmingCharacters(in: .whitespacesAndNewlines) }
+    private var query: String { searchText.trimmingCharacters(in: .whitespacesAndNewlines) }
 
     var body: some View {
-        @Bindable var router = router
         VStack(spacing: 0) {
             filterChips
                 .padding(.horizontal, 16)
@@ -46,7 +48,7 @@ struct MyBookView: View {
             .scrollContentBackground(.hidden)
         }
         .background(ButlerTheme.ivory)
-        .searchable(text: $router.bookSearch, prompt: "Search reminders, notes, people, projects")
+        .searchable(text: $searchText, prompt: "Search reminders, notes, people, projects")
         .navigationTitle("My Book")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
@@ -58,7 +60,10 @@ struct MyBookView: View {
                 .accessibilityLabel("Add")
             }
         }
-        .onAppear { now = Date() }
+        .onAppear {
+            now = Date()
+            if !router.bookSearch.isEmpty { searchText = router.bookSearch; router.bookSearch = "" }
+        }
         .sheet(item: $editingReminder) { r in NavigationStack { ReminderEditorView(mode: .edit(r)) } }
         .sheet(isPresented: $creatingReminder) { NavigationStack { ReminderEditorView(mode: .create(prefill: nil)) } }
         .sheet(isPresented: $creatingMemory) { NavigationStack { MemoryEditorView(mode: .create(prefill: nil)) } }
