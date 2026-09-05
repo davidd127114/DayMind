@@ -98,9 +98,7 @@ enum MainThreadWatchdog {
                 DispatchQueue.main.async { lastPong = Date() }
                 Thread.sleep(forTimeInterval: 4)
                 if lastPong < sent {
-                    fputs("
-===== DAYMIND WATCHDOG: main thread unresponsive for 4s; main-thread backtrace follows =====
-", stderr)
+                    fputs("===== DAYMIND WATCHDOG: main thread unresponsive for 4s; main-thread backtrace follows =====", stderr)
                     pthread_kill(mainThread, SIGUSR1)
                     Thread.sleep(forTimeInterval: 15)
                 }
