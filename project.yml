@@ -55,6 +55,7 @@ targets:
         NSMicrophoneUsageDescription: "DayMind uses the microphone only while you are on the Talk screen and have tapped the microphone button, so it can hear your reminder or note. Audio is transcribed and then discarded. No recordings are stored."
         NSSpeechRecognitionUsageDescription: "DayMind turns your speech into text so it can create reminders and notes. On supported iPhones this happens entirely on your device."
         NSUserNotificationsUsageDescription: "DayMind schedules local notifications so your reminders fire at the right time, even when the app is closed."
+        NSCameraUsageDescription: "DayMind can photograph an appointment card or notice to read its date and text on this iPhone. Photos are only kept if you choose to."
         UIBackgroundModes: [remote-notification]
         CFBundleURLTypes:
           - CFBundleURLName: com.dabkowski.DayMind

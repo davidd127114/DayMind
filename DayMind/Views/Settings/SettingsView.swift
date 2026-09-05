@@ -84,6 +84,12 @@ struct SettingsView: View {
                 }
             }
 
+            Section("Polish") {
+                Toggle("Polish my reminders", isOn: $settings.polishReminders)
+                Text("Tidies grammar and capitalisation of what you said (“call john roof thing” → “Call John roof thing”). Never changes the time, adds people, amounts or urgency. Uses Apple Intelligence on this iPhone when available; otherwise a simple built-in clean-up. Your original words are kept.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+
             Section("Privacy") {
                 Picker("Keep transcripts", selection: $settings.transcriptRetention) {
                     ForEach(TranscriptRetention.allCases) { Text($0.displayName).tag($0) }

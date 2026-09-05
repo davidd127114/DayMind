@@ -61,6 +61,7 @@ final class AppEnvironment {
         actions = AssistantActions(reminders: reminders, memories: memories, projects: projects, people: people, briefing: briefing, settings: settings)
         assistant = AssistantEngine(provider: provider, actions: actions, inbox: inbox, conversation: conversation, settings: settings)
         voice = VoiceController(settings: settings)
+        reminders.polisher = ReminderPolisher(settings: settings, people: people)
     }
 
     /// The only provider shipped: Apple's on-device model. Returns nil on builds/OS versions without it.

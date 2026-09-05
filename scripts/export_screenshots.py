@@ -27,10 +27,13 @@ if os.path.exists(manifest_path):
             src = os.path.join(tmp, att.get("exportedFileName", ""))
             if not os.path.isfile(src):
                 continue
+            if not src.lower().endswith((".png", ".jpg", ".jpeg")):
+                continue  # skip debug-description .txt attachments from failed queries
             name = att.get("suggestedHumanReadableName") or att.get("exportedFileName")
             base, ext = os.path.splitext(name)
             if not ext:
                 ext = os.path.splitext(src)[1] or ".png"
+            base = "".join(ch if (ch.isalnum() or ch in "-_.") else "_" for ch in base)[:80]
             dest = os.path.join(out, base + ext)
             i = 2
             while os.path.exists(dest):

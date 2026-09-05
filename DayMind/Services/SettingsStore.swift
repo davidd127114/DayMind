@@ -25,6 +25,7 @@ final class SettingsStore {
         hasCompletedOnboarding = defaults.bool(forKey: Keys.hasCompletedOnboarding)
         autoStartListeningOnOpen = defaults.object(forKey: Keys.autoStartListening) as? Bool ?? true
         lastDatabaseSync = defaults.object(forKey: Keys.lastDatabaseSync) as? Date ?? .distantPast
+        polishReminders = defaults.bool(forKey: Keys.polishReminders)
     }
 
     private enum Keys {
@@ -42,6 +43,7 @@ final class SettingsStore {
         static let hasCompletedOnboarding = "settings.hasCompletedOnboarding"
         static let autoStartListening = "settings.autoStartListeningOnOpen"
         static let lastDatabaseSync = "settings.lastDatabaseSync"
+        static let polishReminders = "settings.polishReminders"
     }
 
     /// `nil` means "follow the iPhone's current time zone".
@@ -61,6 +63,8 @@ final class SettingsStore {
     var autoStartListeningOnOpen: Bool { didSet { defaults.set(autoStartListeningOnOpen, forKey: Keys.autoStartListening) } }
     /// When this device last wrote its preferences into the database (for the CloudKit mirror).
     var lastDatabaseSync: Date { didSet { defaults.set(lastDatabaseSync, forKey: Keys.lastDatabaseSync) } }
+    /// Off by default. Tidies reminder titles (grammar, capitalisation) without changing meaning.
+    var polishReminders: Bool { didSet { defaults.set(polishReminders, forKey: Keys.polishReminders) } }
 
     /// Incremented whenever a synced preference changes, so `PreferencesSync` can mirror it.
     private(set) var revision: Int = 0

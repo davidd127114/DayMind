@@ -96,7 +96,26 @@ final class ReminderService {
         context.insert(reminder)
         try store.save()
         await syncNotifications(for: reminder)
+        schedulePolish(for: reminder)
         return reminder
+    }
+
+    /// Optional title polish. Runs after the reminder and its alert are safely saved; a late result
+    /// never overwrites a title the user has edited in the meantime.
+    var polisher: ReminderPolisher?
+
+    private func schedulePolish(for reminder: Reminder) {
+        guard let polisher, settings.polishReminders else { return }
+        let id = reminder.id
+        let originalTitle = reminder.title
+        let modifiedAt = reminder.lastModified
+        Task { @MainActor [weak self] in
+            let polished = await polisher.polish(originalTitle)
+            guard let self, polished != originalTitle, let current = self.fetch(id: id),
+                  current.title == originalTitle, current.lastModified == modifiedAt else { return }
+            current.title = polished
+            try? self.store.save()
+        }
     }
 
     static func validate(title: String, dueDate: Date?, recurrence: RecurrenceRule?, now: Date) throws {

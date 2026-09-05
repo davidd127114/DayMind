@@ -19,14 +19,34 @@ struct ButlerFigureView: View {
             micPin
         }
         .frame(width: size, height: size * 0.92)
-        .scaleEffect(breathing && state == .idle && !reduceMotion ? 1.012 : 1.0)
-        .onAppear {
-            guard !reduceMotion else { return }
-            withAnimation(.easeInOut(duration: 3.2).repeatForever(autoreverses: true)) { breathing = true }
-            withAnimation(.easeInOut(duration: 0.55).repeatForever(autoreverses: true)) { wave = true }
-            withAnimation(.linear(duration: 1.6).repeatForever(autoreverses: false)) { spin = true }
-        }
+        .scaleEffect(breathing && state == .idle ? 1.012 : 1.0)
+        .onAppear { updateAnimations() }
+        .onChange(of: state) { _, _ in updateAnimations() }
         .accessibilityHidden(true) // the parent button carries the label
+    }
+
+    /// Animations run only while a state needs them, and never under Reduce Motion or UI testing,
+    /// so the screen is quiet (and cheap) when nothing is happening.
+    private var animationsAllowed: Bool { !reduceMotion && !LaunchOptions.isUITesting }
+
+    private func updateAnimations() {
+        guard animationsAllowed else {
+            breathing = false; wave = false; spin = false
+            return
+        }
+        switch state {
+        case .idle:
+            wave = false; spin = false
+            if !breathing { withAnimation(.easeInOut(duration: 3.2).repeatForever(autoreverses: true)) { breathing = true } }
+        case .listening:
+            breathing = false; spin = false
+            if !wave { withAnimation(.easeInOut(duration: 0.55).repeatForever(autoreverses: true)) { wave = true } }
+        case .processing, .saving, .requestingPermission:
+            breathing = false; wave = false
+            if !spin { withAnimation(.linear(duration: 1.6).repeatForever(autoreverses: false)) { spin = true } }
+        default:
+            withAnimation(.default) { breathing = false; wave = false; spin = false }
+        }
     }
 
     // MARK: Torso

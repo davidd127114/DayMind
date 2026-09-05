@@ -143,7 +143,7 @@ struct ButlerView: View {
 
     private var statusLine: some View {
         HStack(spacing: 8) {
-            if voice.state == .listening { WaveformView(animating: !reduceMotion).frame(height: 18).accessibilityHidden(true) }
+            if voice.state == .listening { WaveformView(animating: !reduceMotion && !LaunchOptions.isUITesting).frame(height: 18).accessibilityHidden(true) }
             Text(statusText)
                 .font(.body)
                 .foregroundStyle(statusIsProblem ? ButlerTheme.failure : ButlerTheme.inkSecondary)
@@ -298,8 +298,23 @@ struct ButlerView: View {
 
     // MARK: Input bar
 
+    @State private var showPhotoSheet = false
+
     private var inputBar: some View {
         HStack(spacing: 10) {
+            Button { showPhotoSheet = true } label: {
+                Image(systemName: "paperclip").font(.title3).padding(8)
+            }
+            .foregroundStyle(ButlerTheme.inkSecondary)
+            .accessibilityLabel("Attach a photo or screenshot")
+            .accessibilityIdentifier("attachPhoto")
+            .sheet(isPresented: $showPhotoSheet) {
+                PhotoCaptureSheet { result in
+                    results.append(result)
+                    if result.actions.contains(where: { $0.changedData }) { UINotificationFeedbackGenerator().notificationOccurred(.success) }
+                    Task { await voice.speak(result.responseText) }
+                }
+            }
             TextField("Type a request…", text: $typedText, axis: .vertical)
                 .lineLimit(1...4)
                 .textFieldStyle(.plain)

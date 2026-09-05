@@ -250,6 +250,10 @@ final class AssistantEngine {
         return finishSimple(mode: mode)
     }
 
+    /// Builds a result from whatever `actions.log` currently holds (used by flows that call
+    /// `AssistantActions` directly, such as the photo sheet).
+    func resultFromCurrentLog() -> AssistantResult { finishSimple(mode: mode) }
+
     /// "Done" on a confirmation card.
     func complete(reminderID: UUID) async -> AssistantResult {
         actions.log.reset()
