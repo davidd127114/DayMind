@@ -28,27 +28,18 @@ struct MyBookView: View {
     private var filter: BookFilter { router.bookFilter }
     private var query: String { searchText.trimmingCharacters(in: .whitespacesAndNewlines) }
 
+    /// Diagnostic knob used only by the screenshot tests: renders progressively more of the screen
+    /// (0 = placeholder … 99 = everything) so a freeze can be pinned to one piece.
+    private var variant: Int { LaunchOptions.value(after: "-daymind-book-variant").flatMap(Int.init) ?? 99 }
+
     var body: some View {
-        VStack(spacing: 0) {
-            filterChips
-                .padding(.horizontal, 16)
-                .padding(.bottom, 4)
-            List {
-                if filter == .needsAttention || (filter == .all && !inbox.isEmpty && query.isEmpty) { needsAttentionSection }
-                if filter == .all || filter == .upcoming { remindersSection }
-                if filter == .completed { completedSection }
-                if filter == .all || filter == .memories { memoriesSection }
-                if let retryResult {
-                    Section("Last retry") {
-                        Text(retryResult.responseText).font(.footnote).foregroundStyle(ButlerTheme.inkSecondary)
-                    }
-                }
+        Group {
+            if variant == 0 {
+                Text("My Book placeholder").foregroundStyle(ButlerTheme.ink)
+            } else {
+                fullBody
             }
-            .listStyle(.insetGrouped)
-            .scrollContentBackground(.hidden)
         }
-        .background(ButlerTheme.ivory)
-        .searchable(text: $searchText, prompt: "Search reminders, notes, people, projects")
         .navigationTitle("My Book")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
@@ -69,6 +60,36 @@ struct MyBookView: View {
         .sheet(isPresented: $creatingMemory) { NavigationStack { MemoryEditorView(mode: .create(prefill: nil)) } }
         .sheet(item: $inboxToReminder) { item in NavigationStack { ReminderEditorView(mode: .create(prefill: prefillReminder(item)), inboxItemToResolve: item) } }
         .sheet(item: $inboxToMemory) { item in NavigationStack { MemoryEditorView(mode: .create(prefill: prefillMemory(item)), inboxItemToResolve: item) } }
+    }
+
+    @ViewBuilder
+    private var fullBody: some View {
+        let content = VStack(spacing: 0) {
+            if variant >= 4 {
+                filterChips
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 4)
+            }
+            List {
+                if variant >= 3, filter == .needsAttention || (filter == .all && !inbox.isEmpty && query.isEmpty) { needsAttentionSection }
+                if variant >= 1, filter == .all || filter == .upcoming { remindersSection }
+                if filter == .completed { completedSection }
+                if variant >= 2, filter == .all || filter == .memories { memoriesSection }
+                if let retryResult {
+                    Section("Last retry") {
+                        Text(retryResult.responseText).font(.footnote).foregroundStyle(ButlerTheme.inkSecondary)
+                    }
+                }
+            }
+            .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+        }
+        .background(ButlerTheme.ivory)
+        if variant >= 5 {
+            content.searchable(text: $searchText, prompt: "Search reminders, notes, people, projects")
+        } else {
+            content
+        }
     }
 
     // MARK: Filters

@@ -25,6 +25,23 @@ final class ScreenshotTests: XCTestCase {
         XCTAssertTrue(app.buttons["butlerMic"].waitForExistence(timeout: 20), "Butler screen did not appear")
     }
 
+    /// Diagnostic bisect: which part of My Book freezes the app?
+    private func bookVariant(_ n: Int) {
+        let app = launch(["-daymind-theme", "light", "-daymind-book-variant", "\(n)"])
+        waitForButler(app)
+        app.buttons["openMyBook"].tap()
+        let ok = app.navigationBars["My Book"].waitForExistence(timeout: 15)
+        let a = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        a.name = "variant-\(n)-\(ok ? "ok" : "frozen")"; a.lifetime = .keepAlways; add(a)
+        XCTAssertTrue(ok, "My Book variant \(n) did not appear")
+    }
+    func testVariant0Placeholder() { bookVariant(0) }
+    func testVariant1Reminders() { bookVariant(1) }
+    func testVariant2Memories() { bookVariant(2) }
+    func testVariant3Inbox() { bookVariant(3) }
+    func testVariant4Chips() { bookVariant(4) }
+    func testVariant5Search() { bookVariant(5) }
+
     /// Diagnostic: capture the raw screen (no element queries) a few seconds after opening My Book,
     /// so a rendering problem can be told apart from an accessibility-snapshot problem.
     func test00RawScreenAfterOpeningBook() {
