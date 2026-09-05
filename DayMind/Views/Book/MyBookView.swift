@@ -185,8 +185,7 @@ struct MyBookView: View {
                         Image(systemName: item.source == .voice ? "mic" : "keyboard")
                         Text(item.reason.displayName)
                         Text("·")
-                        Text(item.capturedAt, style: .relative)
-                        Text("ago")
+                        Text(Self.relative(item.capturedAt))
                     }
                     .font(.caption).foregroundStyle(ButlerTheme.inkSecondary)
                     HStack {
@@ -215,6 +214,13 @@ struct MyBookView: View {
                 Text("These are things I heard but couldn't act on. One tap turns each into a reminder or a note.").foregroundStyle(ButlerTheme.inkSecondary)
             }
         }
+    }
+
+    /// A fixed relative string (not a self-updating Text) so the list stays quiet for accessibility.
+    static func relative(_ date: Date) -> String {
+        let f = RelativeDateTimeFormatter()
+        f.unitsStyle = .short
+        return f.localizedString(for: date, relativeTo: Date())
     }
 
     // MARK: Inbox conversions

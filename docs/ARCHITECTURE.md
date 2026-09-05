@@ -7,11 +7,44 @@
 3. **Never claim what did not happen.** Tools write to the database and record what they did in an `ActionLog`. The spoken confirmation is composed from that log by deterministic code, not from the model's prose.
 4. **Degrade, don't die.** Without Apple Intelligence, a deterministic parser handles the common phrasings and a manual form handles the rest. Anything not understood goes to the Inbox.
 
+## Product shape (5 Sep 2026 revision: "a personal butler")
+
+Two screens only:
+
+* **Butler** (`Views/Butler/ButlerView.swift`) — the faceless tuxedo figure *is* the microphone button
+  (`ButlerFigureView`, pure SwiftUI shapes; states idle / listening / processing / saved / needs
+  clarification / failed carried by the gold shirt-stud "mic pin"). Below it: status line, live
+  transcript, the butler's one-line reply, a **confirmation card** per action with Edit / Undo / Done
+  (`ConfirmationCardView`; Undo only when `AssistantEngine.canUndo` has a real reversal), a
+  "needs attention" banner when unprocessed requests exist, the next one to three reminders, an
+  "Earlier" disclosure for history, and a compact input bar with a photo attachment button.
+* **My Book** (`Views/Book/MyBookView.swift`) — one search field, chips All / Upcoming / Completed /
+  Memories / Needs attention. People and projects are searchable tags, not filing steps.
+
+Everything else is a sheet: Settings, reminder/note editors, onboarding (`OnboardingView`, with a
+real test notification), photo capture (`PhotoCaptureSheet`).
+
+Truthful states come from `ScheduleStatus` (in `ReminderService`): `scheduled`, `repeating`,
+`notificationsDenied`, `notDetermined`, `failed(reason)`, `noAlertNeeded`. The scheduler's
+`apply(plans:)` now returns per-identifier failures, and confirmations never say an alert is set
+unless it is. Undo is implemented as `UndoOperation` values recorded next to each `ActionRecord`
+(delete-again, restore state, restore from `ReminderSnapshot`/`MemorySnapshot`).
+
+Photos: `PhotoTextExtractor` (Apple Vision `VNRecognizeTextRequest`, on device) → `PhotoDateFinder`
+(`NSDataDetector` + the app's date parser) → a review sheet that shows the extracted date, time and
+title and requires a tap before anything is saved. Photo text is never fed to the interpreter as a
+command. Photos are stored only if the user turns on "Keep the photo".
+
+Polish (off by default): `ReminderPolisher` — a deterministic baseline (capitalisation, known names,
+filler words) plus, when Apple Intelligence is available, an on-device rephrase that is validated
+(no new digits, time words, urgency or capitalised names; bounded length). Runs after the reminder
+and its alert are saved and never overwrites a title the user edited in the meantime.
+
 ## Layers
 
 ```
 ┌───────────────────────── SwiftUI ─────────────────────────┐
-│ Today · Talk · Memories · Projects · Inbox · Settings      │
+│ Butler (home) · My Book · sheets (settings, editors, photo) │
 └───────────────┬───────────────────────────────┬───────────┘
                 │                               │
         VoiceController                  AssistantEngine (orchestrator)

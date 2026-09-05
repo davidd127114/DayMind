@@ -307,11 +307,11 @@ final class AssistantEngine {
             let reason: InboxReason = mode == .deterministic ? (lastAvailability.isAvailable ? .modelFailed : .modelUnavailable) : .ambiguous
             return saveToInbox(text: text, source: source, reason: reason, detail: note, mode: mode, ruleIntent: intent)
         }
-        var result = finish(modelText: nil, records: actions.log.records, mode: mode, suggested: nil, text: text, source: source, inboxReason: nil)
         if let note, mode == .deterministic, lastAvailability.isAvailable {
-            result.responseText += " (Apple Intelligence hit a snag: \(note) I used the built-in rules instead.)"
+            // The model failed but the rules were confident; the card shows exactly what happened.
+            logger.info("Used built-in rules after model failure: \(note, privacy: .public)")
         }
-        return result
+        return finish(modelText: nil, records: actions.log.records, mode: mode, suggested: nil, text: text, source: source, inboxReason: nil)
     }
 
     private func saveToInbox(text: String, source: CaptureSource, reason: InboxReason, detail: String?, mode: AssistantMode, ruleIntent: InterpretedIntent) -> AssistantResult {

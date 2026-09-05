@@ -1,8 +1,9 @@
 # DayMind
 
-A private, on-device voice assistant for reminders and long-term memory on iPhone.
-Press one button, speak naturally, and DayMind files it: reminders with real recurrence rules
-and local notifications, or permanent memories about people, projects and decisions.
+A private, on-device personal butler for reminders and long-term memory on iPhone.
+Tap the butler, speak (or type, or attach a photo of an appointment card), and it files it:
+reminders with real recurrence rules and local notifications, or permanent memories about people,
+projects and decisions. Two screens: **Butler** and **My Book**.
 
 **No paid AI. No API keys. No accounts.** Understanding runs on Apple Intelligence (Apple's
 Foundation Models framework) on the iPhone itself. When Apple Intelligence is unavailable, a

@@ -12,7 +12,9 @@ import DayMindCore
 final class AppEnvironment {
     static let shared: AppEnvironment = {
         let settings = SettingsStore()
-        return AppEnvironment(settings: settings, inMemory: false, cloudKit: settings.cloudSyncEnabled, notifications: LocalNotificationScheduler(), provider: defaultProvider())
+        // Screenshot tests exercise the app, not the build host's model: use the deterministic path there.
+        let provider: AIProvider? = LaunchOptions.isUITesting ? nil : defaultProvider()
+        return AppEnvironment(settings: settings, inMemory: false, cloudKit: settings.cloudSyncEnabled, notifications: LocalNotificationScheduler(), provider: provider)
     }()
 
     let settings: SettingsStore
@@ -81,6 +83,7 @@ final class AppEnvironment {
         if LaunchOptions.isUITesting {
             // Screenshot tests: deterministic content, no first-run sheet.
             settings.hasCompletedOnboarding = true
+            settings.speakResponses = false
             if reminders.fetchAll().isEmpty { await SampleData.seed(into: self) }
         } else if SampleData.isRequestedByEnvironment, !settings.hasSeededSampleData, reminders.fetchAll().isEmpty, memories.fetchAll(includeArchived: true).isEmpty {
             await SampleData.seed(into: self)

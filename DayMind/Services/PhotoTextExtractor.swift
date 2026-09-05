@@ -74,11 +74,14 @@ enum PhotoDateFinder {
             for match in detector.matches(in: joined, options: [], range: NSRange(location: 0, length: ns.length)) {
                 guard var date = match.date else { continue }
                 let source = ns.substring(with: match.range)
-                // The detector assumes the current time zone; keep the wall-clock time in the app's zone.
-                if let tz = match.timeZone, tz != calendar.timeZone {
-                    let comps = Calendar.current.dateComponents(in: tz, from: date)
-                    var c = DateComponents(); c.year = comps.year; c.month = comps.month; c.day = comps.day; c.hour = comps.hour; c.minute = comps.minute
-                    date = calendar.date(from: c) ?? date
+                // The detector interprets the text in the system time zone (or one printed on the card);
+                // keep the same wall-clock reading in the app's own calendar/time zone.
+                let sourceZone = match.timeZone ?? TimeZone.current
+                if sourceZone != calendar.timeZone {
+                    var sourceCalendar = Calendar(identifier: .gregorian)
+                    sourceCalendar.timeZone = sourceZone
+                    let comps = sourceCalendar.dateComponents([.year, .month, .day, .hour, .minute], from: date)
+                    date = calendar.date(from: comps) ?? date
                 }
                 let hasTime = Self.mentionsTime(source)
                 if !hasTime {

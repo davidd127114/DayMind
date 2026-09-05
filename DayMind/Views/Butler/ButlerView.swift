@@ -88,31 +88,52 @@ struct ButlerView: View {
 
     // MARK: Header
 
+    @ViewBuilder
     private var header: some View {
-        HStack(alignment: .firstTextBaseline) {
-            VStack(alignment: .leading, spacing: 2) {
+        if typeSize.isAccessibilitySize {
+            // Large text: stack so nothing wraps letter by letter.
+            VStack(alignment: .leading, spacing: 10) {
                 Text(greeting).font(.title2.weight(.semibold)).foregroundStyle(ButlerTheme.ink)
                 Text(env.briefing.headline()).font(.subheadline).foregroundStyle(ButlerTheme.inkSecondary)
+                HStack { bookButton; Spacer(); settingsButton }
             }
-            Spacer()
-            Button { router.openBook() } label: {
-                Label("My Book", systemImage: "book.closed")
-                    .labelStyle(.titleAndIcon)
-                    .font(.subheadline.weight(.medium))
-                    .padding(.horizontal, 12).padding(.vertical, 8)
-                    .background(ButlerTheme.card, in: Capsule())
-                    .overlay(Capsule().strokeBorder(ButlerTheme.goldSoft))
+            .padding(.top, 4)
+        } else {
+            HStack(alignment: .firstTextBaseline) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(greeting).font(.title2.weight(.semibold)).foregroundStyle(ButlerTheme.ink)
+                    Text(env.briefing.headline()).font(.subheadline).foregroundStyle(ButlerTheme.inkSecondary)
+                }
+                Spacer()
+                bookButton
+                settingsButton
             }
-            .foregroundStyle(ButlerTheme.ink)
-            .accessibilityIdentifier("openMyBook")
-            Button { router.showSettings = true } label: {
-                Image(systemName: "gearshape").font(.body).padding(8)
-            }
-            .foregroundStyle(ButlerTheme.inkSecondary)
-            .accessibilityLabel("Settings")
-            .accessibilityIdentifier("openSettings")
+            .padding(.top, 4)
         }
-        .padding(.top, 4)
+    }
+
+    private var bookButton: some View {
+        Button { router.openBook() } label: {
+            Label("My Book", systemImage: "book.closed")
+                .labelStyle(.titleAndIcon)
+                .font(.subheadline.weight(.medium))
+                .lineLimit(1)
+                .fixedSize()
+                .padding(.horizontal, 12).padding(.vertical, 8)
+                .background(ButlerTheme.card, in: Capsule())
+                .overlay(Capsule().strokeBorder(ButlerTheme.goldSoft))
+        }
+        .foregroundStyle(ButlerTheme.ink)
+        .accessibilityIdentifier("openMyBook")
+    }
+
+    private var settingsButton: some View {
+        Button { router.showSettings = true } label: {
+            Image(systemName: "gearshape").font(.body).padding(8)
+        }
+        .foregroundStyle(ButlerTheme.inkSecondary)
+        .accessibilityLabel("Settings")
+        .accessibilityIdentifier("openSettings")
     }
 
     private var greeting: String {
@@ -165,7 +186,7 @@ struct ButlerView: View {
         case .listening: return "Listening… tap again when you're done."
         case .processing: return "One moment…"
         case .saving: return "Saving…"
-        case .speaking: return "…"
+        case .speaking: return "Speaking…"
         case .success: return "Done."
         case .failure(let message): return message
         }
