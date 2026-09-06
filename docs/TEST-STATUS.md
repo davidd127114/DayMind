@@ -25,6 +25,12 @@ A real bug found and fixed by the screenshot tests: binding My Book's push to th
 router (`navigationDestination(isPresented:)`) froze the app on navigation; the stack now uses a
 path (`NavigationStack(path:)`).
 
+### Later on 5 Sep 2026 (from the first real-device session with the butler build)
+User-reported on iPhone 14 Pro Max and fixed the same evening, all verified green on CI (runs 34000705512, 34001785704):
+* Deleting a reminder from the edit sheet left it on screen until navigation — fixed with a store change counter every screen observes; confirmation cards now turn into "Removed …" for deleted items and refresh edited titles/times.
+* The card's "Done" read as "confirm"; it actually completed the reminder — renamed to "Mark done" and removed from freshly created reminders (the card itself is the confirmation).
+* Reminder notification arrived silently — the app now uses iOS's long ringtone-style notification sound (`UNNotificationSound.defaultRingtone`, the loudest allowed without a critical-alerts entitlement), switchable in Settings → Alerts, plus a test-notification button there. iOS still silences apps during Silent mode and Focus; documented in-app.
+
 ## A. Verified by automated tests on macOS / iOS 26 simulator (CI)
 
 Latest green run: GitHub Actions run 33893073937 on 4 September 2026 — Xcode 26.6, iOS 26 simulator.
