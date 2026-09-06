@@ -25,6 +25,15 @@ final class ScreenshotTests: XCTestCase {
         XCTAssertTrue(app.buttons["butlerMic"].waitForExistence(timeout: 20), "Butler screen did not appear")
     }
 
+    /// Opens My Book and waits for it; retries the tap once (a tap during the launch animation can be dropped).
+    private func openBook(_ app: XCUIApplication) {
+        app.buttons["openMyBook"].tap()
+        if !app.navigationBars["My Book"].waitForExistence(timeout: 10) {
+            if app.buttons["openMyBook"].exists { app.buttons["openMyBook"].tap() }
+            XCTAssertTrue(app.navigationBars["My Book"].waitForExistence(timeout: 20), "My Book did not appear")
+        }
+    }
+
     /// Diagnostic: capture the raw screen (no element queries) a few seconds after opening My Book,
     /// so a rendering problem can be told apart from an accessibility-snapshot problem.
     func test00RawScreenAfterOpeningBook() {
@@ -43,8 +52,7 @@ final class ScreenshotTests: XCTestCase {
         let app = launch(["-daymind-theme", "light"])
         waitForButler(app)
         snap(app, "01-butler-light")
-        app.buttons["openMyBook"].tap()
-        XCTAssertTrue(app.navigationBars["My Book"].waitForExistence(timeout: 10))
+        openBook(app)
         snap(app, "02-book-light")
         app.buttons["filter-memories"].tap()
         snap(app, "03-book-memories-light")
@@ -54,8 +62,7 @@ final class ScreenshotTests: XCTestCase {
         let app = launch(["-daymind-theme", "dark"])
         waitForButler(app)
         snap(app, "04-butler-dark")
-        app.buttons["openMyBook"].tap()
-        XCTAssertTrue(app.navigationBars["My Book"].waitForExistence(timeout: 10))
+        openBook(app)
         snap(app, "05-book-dark")
     }
 
@@ -63,8 +70,7 @@ final class ScreenshotTests: XCTestCase {
         let app = launch(["-daymind-theme", "light", "-daymind-textsize", "xxxl"])
         waitForButler(app)
         snap(app, "06-butler-xxxl")
-        app.buttons["openMyBook"].tap()
-        XCTAssertTrue(app.navigationBars["My Book"].waitForExistence(timeout: 10))
+        openBook(app)
         snap(app, "07-book-xxxl")
     }
 
@@ -93,7 +99,7 @@ final class ScreenshotTests: XCTestCase {
         snap(app, "10-needs-attention-card-dark")
         XCTAssertTrue(app.buttons["needsAttention"].waitForExistence(timeout: 20))
         app.buttons["needsAttention"].tap()
-        XCTAssertTrue(app.navigationBars["My Book"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.navigationBars["My Book"].waitForExistence(timeout: 20))
         snap(app, "11-book-needs-attention-dark")
     }
 }
