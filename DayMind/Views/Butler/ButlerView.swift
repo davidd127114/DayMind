@@ -82,8 +82,51 @@ struct ButlerView: View {
             editingReminder = r
             router.reminderToOpen = nil
         }
-        .sheet(item: $editingReminder) { r in NavigationStack { ReminderEditorView(mode: .edit(r)) } }
-        .sheet(item: $editingMemory) { m in NavigationStack { MemoryEditorView(mode: .edit(m)) } }
+        .sheet(item: $editingReminder, onDismiss: pruneResults) { r in NavigationStack { ReminderEditorView(mode: .edit(r)) } }
+        .sheet(item: $editingMemory, onDismiss: pruneResults) { m in NavigationStack { MemoryEditorView(mode: .edit(m)) } }
+        .onChange(of: env.store.changeCount) { _, _ in pruneResults() }
+    }
+
+    /// Keeps the cards truthful: a card about a reminder or note that no longer exists becomes a
+    /// "Removed" card, and summaries are refreshed so edits made in a sheet show immediately.
+    private func pruneResults() {
+        now = Date()
+        results = results.map { result in
+            var r = result
+            r.actions = result.actions.map { record in
+                if let id = record.reminderID, env.reminders.fetch(id: id) == nil {
+                    switch record.kind {
+                    case .reminderCreated(let s), .reminderUpdated(let s, _), .reminderSnoozed(let s, _), .reminderFollowUpSet(let s, _), .reminderCompleted(let s, _):
+                        return ActionRecord(.reminderDeleted(title: s.title))
+                    default: return record
+                    }
+                }
+                if let id = record.memoryID, env.memories.fetch(id: id) == nil {
+                    switch record.kind {
+                    case .memorySaved(let m), .memoryUpdated(let m, _): return ActionRecord(.memoryDeleted(title: m.title))
+                    default: return record
+                    }
+                }
+                // Refresh the summary so an edited title/time shows on the card.
+                if let id = record.reminderID, let live = env.reminders.fetch(id: id) {
+                    let fresh = env.reminders.summary(live)
+                    switch record.kind {
+                    case .reminderCreated: return replacing(record, with: .reminderCreated(fresh))
+                    case .reminderUpdated(_, let change): return replacing(record, with: .reminderUpdated(fresh, change: change))
+                    case .reminderSnoozed(_, let until): return replacing(record, with: .reminderSnoozed(fresh, until: until))
+                    case .reminderFollowUpSet(_, let at): return replacing(record, with: .reminderFollowUpSet(fresh, at: at))
+                    case .reminderCompleted(_, let next): return replacing(record, with: .reminderCompleted(fresh, nextOccurrence: next))
+                    default: return record
+                    }
+                }
+                return record
+            }
+            return r
+        }
+    }
+
+    private func replacing(_ record: ActionRecord, with kind: ActionRecord.Kind) -> ActionRecord {
+        ActionRecord(id: record.id, kind: kind, timestamp: record.timestamp)
     }
 
     // MARK: Header

@@ -99,6 +99,13 @@ struct ActionRecord: Identifiable, Equatable, Sendable {
         self.timestamp = Date()
     }
 
+    /// Same identity, refreshed content (used when a card's summary is updated after an edit).
+    init(id: UUID, kind: Kind, timestamp: Date) {
+        self.id = id
+        self.kind = kind
+        self.timestamp = timestamp
+    }
+
     /// True when the database changed as a result of this action.
     var changedData: Bool {
         switch kind {

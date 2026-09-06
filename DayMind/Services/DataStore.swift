@@ -1,11 +1,16 @@
 import Foundation
+import Observation
 import SwiftData
 import os
 
 /// Owns the SwiftData `ModelContainer`. Local storage always works; CloudKit is layered on only
 /// when the user enabled it *and* the container could be created with CloudKit.
 @MainActor
+@Observable
 final class DataStore {
+    /// Incremented on every successful save. Views read it to refresh immediately after edits/deletes.
+    private(set) var changeCount = 0
+
     enum CloudStatus: Equatable {
         case disabled
         case active
@@ -76,6 +81,7 @@ final class DataStore {
 
     func save() throws {
         if context.hasChanges { try context.save() }
+        changeCount += 1
     }
 
     /// Removes every record. Used by Settings → Delete All Data (after confirmation) and by tests.
@@ -89,5 +95,6 @@ final class DataStore {
         try context.delete(model: UserPreferences.self)
         try context.delete(model: BriefingSettings.self)
         try context.save()
+        changeCount += 1
     }
 }

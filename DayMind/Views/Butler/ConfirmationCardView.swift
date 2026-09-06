@@ -167,12 +167,10 @@ struct ConfirmationCardView: View {
                 if let onUndo, env.assistant.canUndo(record) {
                     Button { onUndo(record) } label: { Label("Undo", systemImage: "arrow.uturn.backward") }
                 }
-                if case .reminderCreated(let r) = record.kind, r.status == .pending, let onDone {
-                    Button { onDone(r.id) } label: { Label("Done", systemImage: "checkmark") }
-                } else if case .reminderUpdated(let r, _) = record.kind, r.status == .pending, let onDone {
-                    Button { onDone(r.id) } label: { Label("Done", systemImage: "checkmark") }
+                if case .reminderUpdated(let r, _) = record.kind, r.status == .pending, let onDone {
+                    Button { onDone(r.id) } label: { Label("Mark done", systemImage: "checkmark") }
                 } else if case .reminderSnoozed(let r, _) = record.kind, let onDone {
-                    Button { onDone(r.id) } label: { Label("Done", systemImage: "checkmark") }
+                    Button { onDone(r.id) } label: { Label("Mark done", systemImage: "checkmark") }
                 }
             }
             .buttonStyle(.bordered)
@@ -186,7 +184,7 @@ struct ConfirmationCardView: View {
 
     private var title: String {
         switch record.kind {
-        case .reminderCreated: return "Reminder saved"
+        case .reminderCreated: return "Saved — you're all set"
         case .reminderUpdated(_, let change): return change.hasPrefix("moved") ? "Reminder moved" : "Reminder updated"
         case .reminderCompleted(_, let next): return next == nil ? "Done" : "Done — next one scheduled"
         case .reminderDeleted: return "Reminder removed"

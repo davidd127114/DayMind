@@ -29,6 +29,7 @@ struct MyBookView: View {
     private var query: String { searchText.trimmingCharacters(in: .whitespacesAndNewlines) }
 
     var body: some View {
+        let _ = env.store.changeCount
         fullBody
         .navigationTitle("My Book")
         .navigationBarTitleDisplayMode(.large)

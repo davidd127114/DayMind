@@ -71,7 +71,7 @@ final class ScreenshotTests: XCTestCase {
     func test04TypedRequestProducesConfirmationCard() {
         let app = launch(["-daymind-theme", "light", "-daymind-demo-request", "Remind me tomorrow at 3 PM to call John about the roof"])
         waitForButler(app)
-        let card = app.staticTexts["Reminder saved"]
+        let card = app.staticTexts["Saved — you're all set"]
         XCTAssertTrue(card.waitForExistence(timeout: 20), "confirmation card did not appear")
         XCTAssertTrue(app.staticTexts["Call John about the roof"].exists)
         snap(app, "08-confirmation-light")
