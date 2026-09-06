@@ -26,6 +26,8 @@ final class SettingsStore {
         autoStartListeningOnOpen = defaults.object(forKey: Keys.autoStartListening) as? Bool ?? true
         lastDatabaseSync = defaults.object(forKey: Keys.lastDatabaseSync) as? Date ?? .distantPast
         polishReminders = defaults.bool(forKey: Keys.polishReminders)
+        loudAlerts = defaults.object(forKey: Keys.loudAlerts) as? Bool ?? true
+        NotificationSoundPreference.loud = loudAlerts
     }
 
     private enum Keys {
@@ -44,6 +46,7 @@ final class SettingsStore {
         static let autoStartListening = "settings.autoStartListeningOnOpen"
         static let lastDatabaseSync = "settings.lastDatabaseSync"
         static let polishReminders = "settings.polishReminders"
+        static let loudAlerts = "settings.loudAlerts"
     }
 
     /// `nil` means "follow the iPhone's current time zone".
@@ -65,6 +68,8 @@ final class SettingsStore {
     var lastDatabaseSync: Date { didSet { defaults.set(lastDatabaseSync, forKey: Keys.lastDatabaseSync) } }
     /// Off by default. Tidies reminder titles (grammar, capitalisation) without changing meaning.
     var polishReminders: Bool { didSet { defaults.set(polishReminders, forKey: Keys.polishReminders) } }
+    /// Long ringtone-style alert sound (the loudest an ordinary app may use) instead of the short chime. On by default.
+    var loudAlerts: Bool { didSet { defaults.set(loudAlerts, forKey: Keys.loudAlerts); NotificationSoundPreference.loud = loudAlerts } }
 
     /// Incremented whenever a synced preference changes, so `PreferencesSync` can mirror it.
     private(set) var revision: Int = 0

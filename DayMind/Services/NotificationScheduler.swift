@@ -17,6 +17,12 @@ struct NotificationPlan: Equatable, Sendable {
     var isFollowUp: Bool = false
 }
 
+/// Read by the scheduler when building requests. Set from `SettingsStore.loudAlerts`.
+enum NotificationSoundPreference {
+    nonisolated(unsafe) static var loud = true
+    static var reminderSound: UNNotificationSound { loud ? .defaultRingtone : .default }
+}
+
 enum NotificationCategory {
     static let reminder = "DAYMIND_REMINDER"
     static let briefing = "DAYMIND_BRIEFING"
@@ -81,7 +87,7 @@ final class LocalNotificationScheduler: NotificationScheduling, @unchecked Senda
             let content = UNMutableNotificationContent()
             content.title = plan.title
             content.body = plan.body
-            content.sound = .default
+            content.sound = NotificationSoundPreference.reminderSound
             content.categoryIdentifier = NotificationCategory.reminder
             content.threadIdentifier = "reminders"
             content.userInfo = [NotificationCategory.reminderIDKey: plan.reminderID.uuidString]
@@ -115,8 +121,8 @@ final class LocalNotificationScheduler: NotificationScheduling, @unchecked Senda
     func scheduleTestNotification(after seconds: TimeInterval) async -> String? {
         let content = UNMutableNotificationContent()
         content.title = "DayMind"
-        content.body = "Notifications are working. This is how a reminder will look."
-        content.sound = .default
+        content.body = "Notifications are working. This is how a reminder will look and sound."
+        content.sound = NotificationSoundPreference.reminderSound
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: max(1, seconds), repeats: false)
         let request = UNNotificationRequest(identifier: "daymind-test-notification", content: content, trigger: trigger)
         do { try await center.add(request); return nil } catch { return error.localizedDescription }

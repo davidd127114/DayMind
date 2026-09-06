@@ -15,6 +15,7 @@ struct SettingsView: View {
     @State private var confirmSampleData = false
     @State private var previewVoiceTask: Task<Void, Never>?
     @State private var timeZoneSearch = ""
+    @State private var testNotificationMessage: String?
 
     private let voices = SpeechOutputService.availableVoices()
 
@@ -62,12 +63,22 @@ struct SettingsView: View {
                 }
             }
 
-            Section("Status") {
+            Section("Alerts") {
                 LabeledContent("Notifications", value: env.notificationStatus)
                 if env.notificationStatus != "Allowed" {
                     Button("Allow notifications") { Task { _ = await env.requestNotificationPermission() } }
-                    if let url = URL(string: UIApplication.openSettingsURLString) { Link("Open iOS Settings", destination: url) }
                 }
+                Toggle("Long alert sound", isOn: $settings.loudAlerts)
+                Text("On: a ringtone-length sound (the loudest an app may use). Off: the short standard chime. iOS still silences all app sounds when the phone is on silent or a Focus is on.")
+                    .font(.caption).foregroundStyle(.secondary)
+                Button {
+                    Task { testNotificationMessage = await env.notifications.scheduleTestNotification(after: 5) ?? "Sent. Lock the phone or go to the Home Screen; it arrives in 5 seconds." }
+                } label: { Label("Send a test notification", systemImage: "paperplane") }
+                if let testNotificationMessage { Text(testNotificationMessage).font(.caption).foregroundStyle(.secondary) }
+                if let url = URL(string: UIApplication.openSettingsURLString) { Link("Open iOS notification settings for DayMind", destination: url) }
+            }
+
+            Section("Status") {
                 VStack(alignment: .leading, spacing: 4) {
                     LabeledContent("Apple Intelligence", value: env.assistant.lastAvailability.title)
                     Text(env.assistant.lastAvailability.detail).font(.caption).foregroundStyle(.secondary)
